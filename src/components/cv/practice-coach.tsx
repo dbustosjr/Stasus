@@ -85,6 +85,8 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
   const yawTrackerRef = useRef(createHeadYawTracker(YAW_OPTS));
   const lastTsRef = useRef(0);
   const visibleRef = useRef(true);
+  const startGenRef = useRef(0);
+  const saveSawPendingRef = useRef(false);
   const categoryRef = useRef(category);
   categoryRef.current = category;
 
@@ -115,16 +117,25 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
 
   useEffect(() => {
     return () => {
+      startGenRef.current += 1;
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
       engineRef.current?.close();
+      engineRef.current = null;
     };
   }, []);
 
   useEffect(() => {
-    if (phase !== "saving" || pending) return;
-    // Action finished (ok or error) — return to collapsed; message shows there.
+    if (phase !== "saving") return;
+    if (pending) {
+      saveSawPendingRef.current = true;
+      return;
+    }
+    // Wait until this submit has flipped pending true→false (avoid prior ok racing).
+    if (!saveSawPendingRef.current) return;
     if (actionState.ok || actionState.error) {
+      saveSawPendingRef.current = false;
       setPhase("collapsed");
       setStatus("idle");
       setStatusDetail(null);
@@ -177,10 +188,18 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
     const cat = categoryRef.current;
 
     if (cat === "gaze_stabilization") {
+      const nose = lm[NOSE];
+      const leftShoulder = lm[LEFT_SHOULDER];
+      const rightShoulder = lm[RIGHT_SHOULDER];
+      if (!nose || !leftShoulder || !rightShoulder) {
+        setStatus("hard_to_see");
+        setStatusDetail("Hard to see your head and shoulders clearly.");
+        return;
+      }
       const sample = yawFromPoseLandmarks({
-        nose: lm[NOSE] ?? { x: 0.5 },
-        leftShoulder: lm[LEFT_SHOULDER] ?? { x: 0.4 },
-        rightShoulder: lm[RIGHT_SHOULDER] ?? { x: 0.6 },
+        nose,
+        leftShoulder,
+        rightShoulder,
       });
       yawTrackerRef.current.update(sample);
       setReps(yawTrackerRef.current.reps);
@@ -195,11 +214,21 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
       return;
     }
 
+    const leftShoulder = lm[LEFT_SHOULDER];
+    const rightShoulder = lm[RIGHT_SHOULDER];
+    const leftHip = lm[LEFT_HIP];
+    const rightHip = lm[RIGHT_HIP];
+    if (!leftShoulder || !rightShoulder || !leftHip || !rightHip) {
+      setStatus("hard_to_see");
+      setStatusDetail("Hard to see your torso clearly.");
+      return;
+    }
+
     const presence = checkBalancePresence({
-      leftShoulder: lm[LEFT_SHOULDER] ?? { x: 0, y: 0 },
-      rightShoulder: lm[RIGHT_SHOULDER] ?? { x: 0, y: 0 },
-      leftHip: lm[LEFT_HIP] ?? { x: 0, y: 0 },
-      rightHip: lm[RIGHT_HIP] ?? { x: 0, y: 0 },
+      leftShoulder,
+      rightShoulder,
+      leftHip,
+      rightHip,
     });
 
     if (!presence.ok) {
@@ -216,6 +245,7 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
   }
 
   async function startPractice() {
+    const gen = ++startGenRef.current;
     setStartError(null);
     setStarting(true);
     setStatus("idle");
@@ -236,11 +266,18 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
         video: { facingMode: "user" },
         audio: false,
       });
+
+      if (gen !== startGenRef.current) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+
       streamRef.current = stream;
 
       const video = videoRef.current;
       if (!video) {
         stream.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
         throw new Error("Video element missing.");
       }
       video.srcObject = stream;
@@ -248,7 +285,19 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
         /* autoplay may reject; stream still attached */
       });
 
+      if (gen !== startGenRef.current) {
+        stopCameraAndEngine();
+        return;
+      }
+
       const engine = await createPoseEngine();
+
+      if (gen !== startGenRef.current) {
+        engine.close();
+        stopCameraAndEngine();
+        return;
+      }
+
       engineRef.current = engine;
 
       startedAtRef.current = Date.now();
@@ -257,6 +306,7 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
       setStatusDetail("Finding you in the frame…");
       rafRef.current = requestAnimationFrame(tick);
     } catch {
+      if (gen !== startGenRef.current) return;
       stopCameraAndEngine();
       setStatus("camera_unavailable");
       setStatusDetail(
@@ -267,7 +317,9 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
       );
       setPhase("privacy");
     } finally {
-      setStarting(false);
+      if (gen === startGenRef.current) {
+        setStarting(false);
+      }
     }
   }
 
@@ -286,6 +338,7 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
     const repCount = isGaze ? yawTrackerRef.current.reps : null;
 
     stopCameraAndEngine();
+    saveSawPendingRef.current = false;
     setPhase("saving");
 
     const fd = new FormData();
