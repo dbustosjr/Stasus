@@ -2,7 +2,8 @@ export type CvTrackMode =
   | "pose_balance"
   | "pose_habituation"
   | "face_gaze_hold"
-  | "face_near_far";
+  | "face_near_far"
+  | "face_presence";
 
 /**
  * Pick on-device tracker for an exercise.
@@ -23,8 +24,8 @@ export function resolveCvTrackMode(
 
   if (category === "habituation") {
     if (/sit-to-stand|sit to stand/i.test(title)) return "pose_habituation";
-    // Visual habituation: face presence / gaze hold light
-    return "face_gaze_hold";
+    // Visual exposure — presence only (not VOR head-turn counting).
+    return "face_presence";
   }
 
   return null;
@@ -33,12 +34,20 @@ export function resolveCvTrackMode(
 export function cvModeCopy(mode: CvTrackMode): string {
   switch (mode) {
     case "face_gaze_hold":
-      return "Eye-target check (iris). Keep looking at your target while you move gently.";
+      return "Keep your eyes on your target while you turn your head slowly. We’ll count turns where your gaze stays with it.";
     case "face_near_far":
-      return "Near–far focus check (face distance). Switch slowly between near and far targets.";
+      return "Webcam can’t see eye focus directly — stay in frame and tap “Count switch” each time you go near→far (or far→near).";
+    case "face_presence":
+      return "Stay gently in view while you do the visual practice. Timer only — no fake rep counting.";
     case "pose_balance":
-      return "Pose check — stay centered in frame with support nearby.";
+      return "Stay centered in frame with support nearby. Timer only — hold quality matters more than reps.";
     case "pose_habituation":
-      return "Pose check — we’ll watch sit-to-stand presence, not form perfection.";
+      return "We’ll count sit-to-stand cycles from your shoulders when you’re in frame. Move slowly.";
   }
+}
+
+export function guideForMode(mode: CvTrackMode): "face" | "torso" {
+  return mode === "pose_balance" || mode === "pose_habituation"
+    ? "torso"
+    : "face";
 }

@@ -4,16 +4,16 @@ import type { RefObject } from "react";
 
 type CameraViewportProps = {
   videoRef: RefObject<HTMLVideoElement | null>;
-  /** Faint static framing guide — never animated landmarks. */
-  showSilhouette?: boolean;
+  /** Framing guide: face-close work vs standing/torso work. */
+  guide?: "face" | "torso" | "none";
 };
 
 /**
- * Mirrored live preview. No bouncing CV overlays — calm framing only.
+ * Mirrored live preview. Soft framing guides only — no animated landmarks.
  */
 export function CameraViewport({
   videoRef,
-  showSilhouette = true,
+  guide = "face",
 }: CameraViewportProps) {
   return (
     <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-mist)] dark:bg-[var(--stasus-bg)]">
@@ -26,24 +26,36 @@ export function CameraViewport({
         style={{ transform: "scaleX(-1)" }}
         aria-label="Live camera preview"
       />
-      {showSilhouette ? (
+      {guide === "face" ? (
         <div
           className="pointer-events-none absolute inset-0 flex items-center justify-center"
           aria-hidden
         >
+          {/* Oval head guide — sized to the frame, not a tall stick figure */}
+          <div
+            className="rounded-[50%] border-2 border-[var(--stasus-teal-secondary)] opacity-25 dark:border-[var(--stasus-aqua)]"
+            style={{ width: "42%", height: "58%" }}
+          />
+        </div>
+      ) : null}
+      {guide === "torso" ? (
+        <div
+          className="pointer-events-none absolute inset-0 flex items-end justify-center pb-[6%]"
+          aria-hidden
+        >
           <svg
-            viewBox="0 0 200 260"
-            className="h-[72%] w-auto opacity-[0.18] text-[var(--stasus-ink-muted)]"
+            viewBox="0 0 160 200"
+            className="h-[78%] w-auto max-w-[55%] opacity-25 text-[var(--stasus-teal-secondary)] dark:text-[var(--stasus-aqua)]"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2.5"
+            strokeWidth="3"
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <circle cx="100" cy="48" r="28" />
-            <path d="M100 76v52" />
-            <path d="M58 110h84" />
-            <path d="M100 128c-28 0-48 22-52 58v18h104v-18c-4-36-24-58-52-58z" />
+            <circle cx="80" cy="36" r="22" />
+            <path d="M80 58v36" />
+            <path d="M42 88h76" />
+            <path d="M52 94c0 48 8 78 28 90M108 94c0 48-8 78-28 90" />
           </svg>
         </div>
       ) : null}

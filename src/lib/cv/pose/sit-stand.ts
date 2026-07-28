@@ -1,14 +1,17 @@
 /**
- * Counts sit-to-stand cycles from hip/shoulder vertical rise then settle.
- * Uses normalized pose y (higher on screen = smaller y in MediaPipe).
+ * Counts sit-to-stand from shoulder height (more visible on laptop webcams
+ * than hips, which often leave the frame).
  */
 export type SitStandSample = {
-  torsoY: number;
+  /** Smaller y = higher in frame (MediaPipe). */
+  shoulderY: number;
   confidence: number;
 };
 
 export type SitStandOptions = {
+  /** How much shoulderY must drop (rise in frame) to count as standing. */
   riseEnter: number;
+  /** How close to baseline to count as seated again. */
   settleBand: number;
   minConfidence: number;
 };
@@ -16,7 +19,7 @@ export type SitStandOptions = {
 export function createSitStandTracker(opts: SitStandOptions) {
   let reps = 0;
   let baselineY: number | null = null;
-  let phase: "seated" | "rising" | "standing" = "seated";
+  let phase: "seated" | "standing" = "seated";
 
   return {
     get reps() {
@@ -26,23 +29,26 @@ export function createSitStandTracker(opts: SitStandOptions) {
       if (sample.confidence < opts.minConfidence) return "low_confidence";
 
       if (baselineY == null) {
-        baselineY = sample.torsoY;
+        baselineY = sample.shoulderY;
         return "ok";
       }
 
-      const delta = baselineY - sample.torsoY; // positive when torso moves up in frame
+      // Slowly adapt baseline while seated so framing drift doesn’t lock us out.
+      if (phase === "seated") {
+        baselineY = baselineY * 0.98 + sample.shoulderY * 0.02;
+      }
 
-      if (phase === "seated" && delta >= opts.riseEnter) {
-        phase = "rising";
-      } else if (phase === "rising" && delta >= opts.riseEnter * 1.2) {
+      const rise = baselineY - sample.shoulderY; // positive when shoulders move up
+
+      if (phase === "seated" && rise >= opts.riseEnter) {
         phase = "standing";
       } else if (
         phase === "standing" &&
-        Math.abs(sample.torsoY - baselineY) <= opts.settleBand
+        sample.shoulderY >= baselineY - opts.settleBand
       ) {
         reps += 1;
         phase = "seated";
-        baselineY = sample.torsoY;
+        baselineY = sample.shoulderY;
       }
 
       return "ok";
