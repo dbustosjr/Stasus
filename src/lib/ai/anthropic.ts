@@ -38,7 +38,8 @@ Rules:
 - No diagnosis or condition confirmation.
 - No medication or treatment-plan advice.
 - Prefer conservative significance; if data is sparse, significant=false.
-- Do not invent medical claims.`,
+- Do not invent medical claims.
+- Write summary_points in plain human language (e.g. "sleep came up often", "a few tougher evenings mid-week") — not sterile analytics phrasing ("batch logging", "real-time tracking", "data points").`,
     messages: [
       {
         role: "user",
@@ -81,19 +82,21 @@ export async function runSonnetInsight(payload: {
     model: SONNET_MODEL,
     max_tokens: 700,
     temperature: 0.4,
-    system: `You write weekly wellness insights for Stasus, a vestibular symptom management wellness app.
+    system: `You write a short weekly note for Stasus, a vestibular wellness app.
+Voice: warm, plainspoken, human — like a thoughtful clinician friend, not a dashboard or analyst report.
 Hard rules:
 - Never diagnose, confirm conditions, or suggest medications/treatment plans.
-- Pattern-level language only ("you logged more entries on…").
-- Calm, non-punitive, no streak-shaming.
-- If significance is low or data is sparse, say so gently and suggest continuing logging/practice.
-- If the user should consider emergency care for stroke-like clusters, do NOT diagnose — remind them of emergency cues already in the app.
-- Keep under 180 words.`,
+- Talk about patterns gently ("a few days clustered…", "sleep showed up often…") — avoid sterile phrases like "batch logging", "real-time tracking", "data points", "entries in quick succession", or "significance".
+- Do not invent section headers like "What showed up:" unless the user would naturally write that way; prefer flowing paragraphs.
+- Calm and non-punitive. Missed days are fine.
+- If the week is sparse, say so kindly and keep it short.
+- If emergency-adjacent clusters appear, do NOT diagnose — briefly remind them the app has emergency cues.
+- Keep under 160 words. No emojis. No model/meta commentary.`,
     messages: [
       {
         role: "user",
-        content: `Write the user-facing weekly insight for week_start=${payload.weekStart}.
-Structured analysis JSON:
+        content: `Write the weekly note for the week starting ${payload.weekStart}.
+Use this structured analysis only as quiet background (do not quote it mechanically):
 ${JSON.stringify(payload.analysis)}`,
       },
     ],

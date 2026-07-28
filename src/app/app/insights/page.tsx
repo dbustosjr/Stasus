@@ -2,12 +2,23 @@ import { requireOnboarded } from "@/lib/auth/require-onboarded";
 import { AppShell } from "@/components/app-shell";
 import { GenerateInsightButton } from "@/components/generate-insight-button";
 
+function formatWeekLabel(weekStart: string): string {
+  const d = new Date(`${weekStart}T12:00:00.000Z`);
+  if (Number.isNaN(d.getTime())) return `Week of ${weekStart}`;
+  return d.toLocaleDateString(undefined, {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export default async function InsightsPage() {
   const { insforge, user } = await requireOnboarded();
 
   const { data: insights, error } = await insforge.database
     .from("ai_insights")
-    .select("id, week_start, insight_text, model_used, generated_at")
+    .select("id, week_start, insight_text, generated_at")
     .eq("user_id", user.id)
     .order("week_start", { ascending: false })
     .limit(12);
@@ -17,12 +28,12 @@ export default async function InsightsPage() {
   return (
     <AppShell email={user.email} active="insights">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-[var(--stasus-ink)]">
-          Weekly insights
+        <h1 className="font-display text-3xl font-medium tracking-tight text-[var(--stasus-ink)] sm:text-4xl">
+          Weekly notes
         </h1>
         <p className="mt-2 max-w-2xl text-[var(--stasus-ink-muted)]">
-          Pattern-level summaries on a weekly cadence — not reactive coaching
-          after each log. No diagnoses or medication advice.
+          Once a week, a short look at what you logged — written like a note,
+          not a clinical readout. No diagnoses. No medication advice.
         </p>
       </div>
 
@@ -45,33 +56,26 @@ export default async function InsightsPage() {
 
       {!insights?.length ? (
         <p className="text-[var(--stasus-ink-muted)]">
-          No weekly insights yet. Log a few tracker entries across the week,
-          then generate when ready.
+          Nothing here yet. A few tracker entries across the week give this
+          something gentle to work with.
         </p>
       ) : (
-        <ul className="flex flex-col gap-4">
+        <ul className="flex flex-col divide-y divide-[var(--stasus-border)] border-y border-[var(--stasus-border)]">
           {insights.map((row) => {
             const item = row as {
               id: string;
               week_start: string;
               insight_text: string;
-              model_used: string;
               generated_at: string;
             };
             return (
-              <li
-                key={item.id}
-                className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 py-5"
-              >
+              <li key={item.id} className="py-6">
                 <p className="text-sm text-[var(--stasus-ink-muted)]">
-                  Week of {item.week_start}
+                  Week of {formatWeekLabel(item.week_start)}
                 </p>
-                <p className="mt-3 whitespace-pre-wrap leading-relaxed text-[var(--stasus-ink)]">
+                <div className="mt-3 max-w-2xl whitespace-pre-wrap text-base leading-relaxed text-[var(--stasus-ink)]">
                   {item.insight_text}
-                </p>
-                <p className="mt-3 text-xs text-[var(--stasus-ink-muted)]">
-                  Model: {item.model_used}
-                </p>
+                </div>
               </li>
             );
           })}

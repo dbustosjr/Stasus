@@ -1,7 +1,6 @@
-/* Stasus minimal service worker — shell cache only; never cache private health APIs. */
-const CACHE = "stasus-shell-v1";
+/* Stasus minimal service worker — offline shell only; never pin the marketing HTML. */
+const CACHE = "stasus-shell-v3";
 const PRECACHE = [
-  "/",
   "/offline",
   "/manifest.webmanifest",
   "/icons/icon-192.png",
@@ -12,15 +11,21 @@ const PRECACHE = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()),
+    caches
+      .open(CACHE)
+      .then((cache) => cache.addAll(PRECACHE))
+      .then(() => self.skipWaiting()),
   );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))),
-    ).then(() => self.clients.claim()),
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))),
+      )
+      .then(() => self.clients.claim()),
   );
 });
 
@@ -39,23 +44,19 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Navigations: network first, offline fallback
+  // Navigations: always prefer network. Do not cache "/" — stale HTML caused
+  // the landing page to "revert" and hydrate against a newer client bundle.
   if (req.mode === "navigate") {
     event.respondWith(
-      fetch(req)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((cache) => cache.put(req, copy));
-          return res;
-        })
-        .catch(() => caches.match("/offline").then((r) => r || caches.match("/"))),
+      fetch(req).catch(() =>
+        caches.match("/offline").then((r) => r || Response.error()),
+      ),
     );
     return;
   }
 
-  // Static assets: cache first
+  // Brand/icons: cache first (stable filenames)
   if (
-    url.pathname.startsWith("/_next/static/") ||
     url.pathname.startsWith("/brand/") ||
     url.pathname.startsWith("/icons/")
   ) {
@@ -69,6 +70,19 @@ self.addEventListener("fetch", (event) => {
             return res;
           }),
       ),
+    );
+  }
+
+  // Hashed Next assets: network first, then cache (avoids sticky old chunks)
+  if (url.pathname.startsWith("/_next/static/")) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          const copy = res.clone();
+          caches.open(CACHE).then((cache) => cache.put(req, copy));
+          return res;
+        })
+        .catch(() => caches.match(req).then((r) => r || Response.error())),
     );
   }
 });

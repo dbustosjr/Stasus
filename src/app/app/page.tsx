@@ -22,29 +22,29 @@ export default async function AppHomePage() {
   return (
     <AppShell email={user.email} active="home">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-[var(--stasus-ink)]">
-          Your space
+        <h1 className="font-display text-3xl font-medium tracking-tight text-[var(--stasus-ink)] sm:text-4xl">
+          Welcome back
         </h1>
-        <p className="mt-2 text-[var(--stasus-ink-muted)]">
-          Practice, track, and use calm tools — at a pace that respects your
-          system.
+        <p className="mt-2 max-w-xl text-[var(--stasus-ink-muted)]">
+          Pick up wherever feels doable today — practice, a quick log, or a
+          calm minute. Nothing here is a scorecard.
         </p>
       </div>
 
       {suggested.length > 0 ? (
-        <section className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 py-4">
-          <h2 className="text-sm font-semibold text-[var(--stasus-ink)]">
-            Suggested starting paths
+        <section className="border-y border-[var(--stasus-border)] py-5">
+          <h2 className="text-sm font-semibold tracking-wide text-[var(--stasus-ink)]">
+            A place to start
           </h2>
           <p className="mt-1 text-sm text-[var(--stasus-ink-muted)]">
-            Based on what you shared in onboarding — explore, don’t force.
+            From what you shared in onboarding — optional, not homework.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {suggested.map((category) => (
               <Link
                 key={category}
                 href="/app/exercises"
-                className="rounded-full bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] px-3 py-1 text-xs font-semibold text-[var(--stasus-ink)]"
+                className="cursor-pointer rounded-full bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] px-3 py-1 text-xs font-semibold text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_34%,transparent)]"
               >
                 {CATEGORY_META[category].label}
               </Link>
@@ -53,61 +53,57 @@ export default async function AppHomePage() {
         </section>
       ) : null}
 
-      <Link
-        href="/app/exercises"
-        className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-6 py-5 transition-colors hover:border-[var(--stasus-teal-secondary)]"
-      >
-        <h2 className="text-lg font-semibold text-[var(--stasus-ink)]">
-          Exercise library
-        </h2>
-        <p className="mt-1 text-sm text-[var(--stasus-ink-muted)]">
-          Habituation, gaze stabilization, balance, and canalith orientation
-          cards.
-        </p>
-      </Link>
+      <nav className="flex flex-col divide-y divide-[var(--stasus-border)] border-y border-[var(--stasus-border)]" aria-label="Shortcuts">
+        {[
+          {
+            href: "/app/exercises",
+            title: "Exercises",
+            body: "Habituation, gaze, balance, and canalith orientation — at your pace.",
+          },
+          {
+            href: "/app/tracker",
+            title: "Tracker",
+            body: "Log how things felt, how long, and what may have stirred them.",
+          },
+          {
+            href: "/app/calm",
+            title: "Calm",
+            body: "Small tools for the checking loop and a steadier breath.",
+          },
+          {
+            href: "/app/insights",
+            title: "Weekly notes",
+            body: "A quiet summary once a week — never after every log.",
+          },
+        ].map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="group flex cursor-pointer items-baseline justify-between gap-4 py-5 transition-colors hover:text-[var(--stasus-teal-secondary)]"
+          >
+            <div>
+              <h2 className="font-display text-xl font-medium text-[var(--stasus-ink)] group-hover:text-[var(--stasus-teal-secondary)]">
+                {item.title}
+              </h2>
+              <p className="mt-1 text-sm text-[var(--stasus-ink-muted)]">
+                {item.body}
+              </p>
+            </div>
+            <span
+              aria-hidden
+              className="text-lg text-[var(--stasus-ink-muted)] transition-transform group-hover:translate-x-0.5"
+            >
+              →
+            </span>
+          </Link>
+        ))}
+      </nav>
 
-      <Link
-        href="/app/tracker"
-        className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-6 py-5 transition-colors hover:border-[var(--stasus-teal-secondary)]"
-      >
-        <h2 className="text-lg font-semibold text-[var(--stasus-ink)]">
-          Symptom tracker
-        </h2>
-        <p className="mt-1 text-sm text-[var(--stasus-ink-muted)]">
-          Log severity, duration, presets, and custom triggers privately.
-        </p>
-      </Link>
-
-      <Link
-        href="/app/calm"
-        className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-6 py-5 transition-colors hover:border-[var(--stasus-teal-secondary)]"
-      >
-        <h2 className="text-lg font-semibold text-[var(--stasus-ink)]">
-          Calm tools
-        </h2>
-        <p className="mt-1 text-sm text-[var(--stasus-ink-muted)]">
-          Fear–avoidance education, reframing symptom checking, grounding, and
-          steady breathing.
-        </p>
-      </Link>
-
-      <Link
-        href="/app/insights"
-        className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-6 py-5 transition-colors hover:border-[var(--stasus-teal-secondary)]"
-      >
-        <h2 className="text-lg font-semibold text-[var(--stasus-ink)]">
-          Weekly insights
-        </h2>
-        <p className="mt-1 text-sm text-[var(--stasus-ink-muted)]">
-          Pattern summaries on a weekly cadence — never after every log.
-        </p>
-      </Link>
-
-      <section className="rounded-[1.5rem] border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-6 py-6">
-        <h2 className="text-lg font-semibold text-[var(--stasus-ink)]">
+      <section className="py-2">
+        <h2 className="text-sm font-semibold text-[var(--stasus-ink)]">
           Profile
         </h2>
-        <dl className="mt-4 grid gap-3 text-sm">
+        <dl className="mt-3 grid gap-3 text-sm">
           <div className="flex justify-between gap-4">
             <dt className="text-[var(--stasus-ink-muted)]">Onboarding</dt>
             <dd className="font-medium text-[var(--stasus-ink)]">Complete</dd>

@@ -50,7 +50,7 @@ export function AppShell({ children, email, active = "home" }: AppShellProps) {
           <form action={signOut}>
             <button
               type="submit"
-              className="min-h-11 rounded-full border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-4 py-2 text-sm font-medium text-[var(--stasus-ink)]"
+              className="min-h-11 cursor-pointer rounded-full border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-4 py-2 text-sm font-medium text-[var(--stasus-ink)] transition-colors hover:border-[var(--stasus-teal-secondary)] hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_18%,var(--stasus-surface))] hover:text-[var(--stasus-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-teal)] active:scale-[0.98]"
             >
               Sign out
             </button>

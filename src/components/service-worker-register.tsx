@@ -5,7 +5,25 @@ import { useEffect } from "react";
 /** Registers the service worker for Add to Home Screen / offline shell. No install UI. */
 export function ServiceWorkerRegister() {
   useEffect(() => {
-    if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
+    if (typeof window === "undefined") return;
+
+    try {
+      window.localStorage.removeItem("stasus-theme");
+    } catch {
+      // ignore
+    }
+
+    if (!("serviceWorker" in navigator)) {
+      return;
+    }
+
+    // Dev: never register — cached "/" + HMR was causing landing hydration flips.
+    if (process.env.NODE_ENV === "development") {
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        for (const reg of regs) {
+          void reg.unregister();
+        }
+      });
       return;
     }
 

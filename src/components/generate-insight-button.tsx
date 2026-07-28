@@ -19,9 +19,9 @@ export function GenerateInsightButton() {
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex h-11 w-fit items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white disabled:opacity-60 dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
+        className="inline-flex h-11 w-fit cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white transition-colors hover:bg-[var(--stasus-teal-secondary)] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[var(--stasus-aqua)] dark:text-[#001219] dark:hover:bg-[#9ec9c6]"
       >
-        {pending ? "Generating…" : "Generate this week’s insight"}
+        {pending ? "Writing your note…" : "Write this week’s note"}
       </button>
       {state.error ? (
         <p
@@ -33,7 +33,7 @@ export function GenerateInsightButton() {
       ) : null}
       {state.ok ? (
         <p className="text-sm text-[var(--stasus-ink-muted)]">
-          Insight saved for this week.
+          Saved for this week.
         </p>
       ) : null}
     </form>

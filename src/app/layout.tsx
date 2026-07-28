@@ -1,11 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope } from "next/font/google";
-import { ThemeProvider } from "@/components/theme-provider";
+import { Fraunces, Manrope } from "next/font/google";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import "./globals.css";
 
 const manrope = Manrope({
   variable: "--font-manrope",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
@@ -23,7 +29,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     title: "Stasus",
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
   },
   icons: {
     icon: [
@@ -42,10 +48,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#014152" },
-    { media: "(prefers-color-scheme: dark)", color: "#001219" },
-  ],
+  colorScheme: "dark",
+  themeColor: "#001219",
 };
 
 export default function RootLayout({
@@ -54,12 +58,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${manrope.variable} h-full`} suppressHydrationWarning>
-      <body className="min-h-full font-sans antialiased">
-        <ThemeProvider>
-          {children}
-          <ServiceWorkerRegister />
-        </ThemeProvider>
+    <html
+      lang="en"
+      className={`${manrope.variable} ${fraunces.variable} dark h-full`}
+    >
+      <body className="min-h-full bg-[var(--stasus-bg)] font-sans text-[var(--stasus-ink)] antialiased">
+        {children}
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
