@@ -11,7 +11,8 @@
     "test:head-yaw": "node --experimental-strip-types scripts/test-head-yaw.mjs",
     "test:balance-presence": "node --experimental-strip-types scripts/test-balance-presence.mjs",
     "test:session-cv-fields": "node --experimental-strip-types scripts/test-session-cv-fields.mjs",
-    "test:cv": "npm run test:head-yaw && npm run test:balance-presence && npm run test:session-cv-fields"
+    "test:cv": "npm run test:head-yaw && npm run test:balance-presence && npm run test:session-cv-fields && npm run test:phase-b-cv",
+    "test:phase-b-cv": "node --experimental-strip-types scripts/test-phase-b-cv.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

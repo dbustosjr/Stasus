@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
-  logExerciseSession,
+  saveCameraPracticeSession,
   type SessionFormState,
 } from "@/app/actions/sessions";
 import { CameraViewport } from "@/components/cv/camera-viewport";
@@ -10,50 +10,61 @@ import {
   TrackingStatus,
   type TrackingStatusKind,
 } from "@/components/cv/tracking-status";
+import {
+  createFaceEngine,
+  type FaceEngine,
+} from "@/lib/cv/face/engine";
+import { createGazeHoldTracker } from "@/lib/cv/face/gaze-hold";
+import { createNearFarTracker } from "@/lib/cv/face/near-far";
 import { checkBalancePresence } from "@/lib/cv/pose/balance-presence";
 import {
   createPoseEngine,
   type PoseEngine,
 } from "@/lib/cv/pose/engine";
 import {
-  createHeadYawTracker,
-  yawFromPoseLandmarks,
-} from "@/lib/cv/pose/head-yaw";
-import {
   LEFT_HIP,
   LEFT_SHOULDER,
-  NOSE,
   RIGHT_HIP,
   RIGHT_SHOULDER,
 } from "@/lib/cv/pose/landmarks";
+import { createSitStandTracker } from "@/lib/cv/pose/sit-stand";
+import {
+  cvModeCopy,
+  resolveCvTrackMode,
+  type CvTrackMode,
+} from "@/lib/cv/track-mode";
 import type { ExerciseCategory } from "@/lib/exercises/types";
 
 const initialAction: SessionFormState = { error: null, ok: false };
 
-const YAW_OPTS = {
-  enterThreshold: 0.12,
-  returnThreshold: 0.04,
-  minConfidence: 0.6,
+const GAZE_OPTS = {
+  irisTolerance: 0.06,
+  yawEnter: 0.07,
+  minConfidence: 0.55,
 } as const;
 
-const MIN_TRACK_CONFIDENCE = 0.6;
+const NEAR_FAR_OPTS = {
+  nearEnterRatio: 0.12,
+  farEnterRatio: 0.12,
+  minConfidence: 0.55,
+} as const;
 
-type Phase = "collapsed" | "privacy" | "active" | "saving";
+const SIT_STAND_OPTS = {
+  riseEnter: 0.04,
+  settleBand: 0.025,
+  minConfidence: 0.55,
+} as const;
+
+const CALIB_MS = 2000;
+
+type Phase = "collapsed" | "privacy" | "calibrating" | "active" | "saving";
+type AnyEngine = PoseEngine | FaceEngine;
 
 type PracticeCoachProps = {
   exerciseId: string;
   category: ExerciseCategory;
+  title: string;
 };
-
-function categoryCopy(category: ExerciseCategory): string {
-  if (category === "gaze_stabilization") {
-    return "Head movement check (pose). Eye tracking comes later.";
-  }
-  if (category === "balance_training") {
-    return "Pose check — stay centered in frame with support nearby.";
-  }
-  return "Pose check — stay comfortably in frame. This is practice support, not a diagnosis.";
-}
 
 function formatElapsed(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -61,11 +72,49 @@ function formatElapsed(seconds: number): string {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+function needsCalibration(mode: CvTrackMode): boolean {
+  return mode === "face_gaze_hold" || mode === "face_near_far";
+}
+
+function usesFace(mode: CvTrackMode): boolean {
+  return mode === "face_gaze_hold" || mode === "face_near_far";
+}
+
+function countsReps(mode: CvTrackMode): boolean {
+  return (
+    mode === "face_gaze_hold" ||
+    mode === "face_near_far" ||
+    mode === "pose_habituation"
+  );
+}
+
+function repLabel(mode: CvTrackMode): string {
+  switch (mode) {
+    case "face_gaze_hold":
+      return "Stable gaze turns";
+    case "face_near_far":
+      return "Near–far switches";
+    case "pose_habituation":
+      return "Sit-to-stand cycles";
+    default:
+      return "Reps";
+  }
+}
+
 /**
- * On-device pose practice coach. Camera frames never leave the browser;
- * only timing, optional reps, and average tracking confidence are saved.
+ * On-device practice coach (Pose and/or Face/iris). Camera never leaves the device.
  */
-export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
+export function PracticeCoach({
+  exerciseId,
+  category,
+  title,
+}: PracticeCoachProps) {
+  const mode =
+    resolveCvTrackMode(category, title) ??
+    (category === "balance_training"
+      ? "pose_balance"
+      : "face_gaze_hold");
+
   const [phase, setPhase] = useState<Phase>("collapsed");
   const [status, setStatus] = useState<TrackingStatusKind>("idle");
   const [statusDetail, setStatusDetail] = useState<string | null>(null);
@@ -74,29 +123,36 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
   const [startError, setStartError] = useState<string | null>(null);
   const [reducedMotion, setReducedMotion] = useState(true);
   const [starting, setStarting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [actionState, setActionState] =
+    useState<SessionFormState>(initialAction);
+  const [calibProgress, setCalibProgress] = useState(0);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const engineRef = useRef<PoseEngine | null>(null);
-  const rafRef = useRef<number>(0);
-  const startedAtRef = useRef<number>(0);
+  const engineRef = useRef<AnyEngine | null>(null);
+  const rafRef = useRef(0);
+  const startedAtRef = useRef(0);
+  const calibStartedRef = useRef(0);
   const confidenceSumRef = useRef(0);
   const confidenceCountRef = useRef(0);
-  const yawTrackerRef = useRef(createHeadYawTracker(YAW_OPTS));
   const lastTsRef = useRef(0);
   const visibleRef = useRef(true);
   const startGenRef = useRef(0);
-  const saveSawPendingRef = useRef(false);
-  const categoryRef = useRef(category);
-  categoryRef.current = category;
+  const modeRef = useRef(mode);
+  modeRef.current = mode;
+  const phaseRef = useRef(phase);
+  phaseRef.current = phase;
 
-  const [actionState, formAction, pending] = useActionState(
-    logExerciseSession,
-    initialAction,
-  );
+  const gazeRef = useRef(createGazeHoldTracker(GAZE_OPTS));
+  const nearFarRef = useRef(createNearFarTracker(NEAR_FAR_OPTS));
+  const sitStandRef = useRef(createSitStandTracker(SIT_STAND_OPTS));
 
-  const isGaze = category === "gaze_stabilization";
-  const showSession = phase === "privacy" || phase === "active" || phase === "saving";
+  const showSession =
+    phase === "privacy" ||
+    phase === "calibrating" ||
+    phase === "active" ||
+    phase === "saving";
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -126,24 +182,6 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
     };
   }, []);
 
-  useEffect(() => {
-    if (phase !== "saving") return;
-    if (pending) {
-      saveSawPendingRef.current = true;
-      return;
-    }
-    // Wait until this submit has flipped pending true→false (avoid prior ok racing).
-    if (!saveSawPendingRef.current) return;
-    if (actionState.ok || actionState.error) {
-      saveSawPendingRef.current = false;
-      setPhase("collapsed");
-      setStatus("idle");
-      setStatusDetail(null);
-      setElapsed(0);
-      setReps(0);
-    }
-  }, [actionState.ok, actionState.error, phase, pending]);
-
   function stopLoop() {
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
@@ -154,11 +192,17 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
   function stopCameraAndEngine() {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
+    if (videoRef.current) videoRef.current.srcObject = null;
     engineRef.current?.close();
     engineRef.current = null;
+  }
+
+  function currentReps(): number {
+    const m = modeRef.current;
+    if (m === "face_gaze_hold") return gazeRef.current.reps;
+    if (m === "face_near_far") return nearFarRef.current.reps;
+    if (m === "pose_habituation") return sitStandRef.current.reps;
+    return 0;
   }
 
   function tick(now: number) {
@@ -170,43 +214,99 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
     if (!visibleRef.current) return;
     if (video.readyState < 2) return;
 
-    // MediaPipe requires strictly increasing timestamps.
     const ts = Math.max(now, lastTsRef.current + 1);
     lastTsRef.current = ts;
 
-    const detection = engine.detect(video, ts);
-    if (!detection) {
-      setStatus("hard_to_see");
-      setStatusDetail("Move a bit closer or improve lighting.");
-      return;
-    }
+    const m = modeRef.current;
+    const currentPhase = phaseRef.current;
 
-    confidenceSumRef.current += detection.confidence;
-    confidenceCountRef.current += 1;
-
-    const lm = detection.landmarks;
-    const cat = categoryRef.current;
-
-    if (cat === "gaze_stabilization") {
-      const nose = lm[NOSE];
-      const leftShoulder = lm[LEFT_SHOULDER];
-      const rightShoulder = lm[RIGHT_SHOULDER];
-      if (!nose || !leftShoulder || !rightShoulder) {
+    if (usesFace(m)) {
+      const face = (engine as FaceEngine).detect(video, ts);
+      if (!face) {
         setStatus("hard_to_see");
-        setStatusDetail("Hard to see your head and shoulders clearly.");
+        setStatusDetail("Keep your face clearly in view.");
         return;
       }
-      const sample = yawFromPoseLandmarks({
-        nose,
-        leftShoulder,
-        rightShoulder,
-      });
-      yawTrackerRef.current.update(sample);
-      setReps(yawTrackerRef.current.reps);
 
-      if (sample.confidence < MIN_TRACK_CONFIDENCE) {
+      confidenceSumRef.current += face.confidence;
+      confidenceCountRef.current += 1;
+
+      if (currentPhase === "calibrating") {
+        if (m === "face_gaze_hold") {
+          gazeRef.current.addCalibrationSample({
+            irisMid: face.irisMid,
+            headYaw: face.headYaw,
+            confidence: face.confidence,
+          });
+        } else {
+          nearFarRef.current.addBaselineSample({
+            faceScale: face.faceScale,
+            confidence: face.confidence,
+          });
+        }
+        const pct = Math.min(
+          100,
+          Math.round(((now - calibStartedRef.current) / CALIB_MS) * 100),
+        );
+        setCalibProgress(pct);
+        setStatus("tracking_well");
+        setStatusDetail(
+          m === "face_gaze_hold"
+            ? "Hold still — look at your target…"
+            : "Hold a mid distance from the camera…",
+        );
+        if (now - calibStartedRef.current >= CALIB_MS) {
+          const ok =
+            m === "face_gaze_hold"
+              ? gazeRef.current.finishCalibration()
+              : nearFarRef.current.finishBaseline();
+          if (ok) {
+            startedAtRef.current = Date.now();
+            setPhase("active");
+            setCalibProgress(100);
+            setStatusDetail(
+              m === "face_gaze_hold"
+                ? "Turn your head slowly; keep eyes on the target."
+                : "Switch slowly between near and far focus.",
+            );
+          } else {
+            calibStartedRef.current = now;
+            setCalibProgress(0);
+            setStatus("hard_to_see");
+            setStatusDetail("Couldn’t calibrate — face the camera and retry.");
+          }
+        }
+        return;
+      }
+
+      if (m === "face_gaze_hold") {
+        const result = gazeRef.current.update({
+          irisMid: face.irisMid,
+          headYaw: face.headYaw,
+          confidence: face.confidence,
+        });
+        setReps(gazeRef.current.reps);
+        if (result === "low_confidence") {
+          setStatus("hard_to_see");
+          setStatusDetail("Hard to see your eyes clearly.");
+        } else if (result === "gaze_drift") {
+          setStatus("hard_to_see");
+          setStatusDetail("Eyes drifted from the target — look back at it.");
+        } else {
+          setStatus("tracking_well");
+          setStatusDetail(null);
+        }
+        return;
+      }
+
+      const nf = nearFarRef.current.update({
+        faceScale: face.faceScale,
+        confidence: face.confidence,
+      });
+      setReps(nearFarRef.current.reps);
+      if (nf === "low_confidence" || nf === "need_baseline") {
         setStatus("hard_to_see");
-        setStatusDetail("Hard to see your head and shoulders clearly.");
+        setStatusDetail("Hard to see your face clearly.");
       } else {
         setStatus("tracking_well");
         setStatusDetail(null);
@@ -214,6 +314,18 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
       return;
     }
 
+    // Pose modes
+    const pose = (engine as PoseEngine).detect(video, ts);
+    if (!pose) {
+      setStatus("hard_to_see");
+      setStatusDetail("Move a bit closer or improve lighting.");
+      return;
+    }
+
+    confidenceSumRef.current += pose.confidence;
+    confidenceCountRef.current += 1;
+
+    const lm = pose.landmarks;
     const leftShoulder = lm[LEFT_SHOULDER];
     const rightShoulder = lm[RIGHT_SHOULDER];
     const leftHip = lm[LEFT_HIP];
@@ -224,13 +336,33 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
       return;
     }
 
+    if (m === "pose_habituation") {
+      const torsoY =
+        (leftShoulder.y + rightShoulder.y + leftHip.y + rightHip.y) / 4;
+      const conf = Math.min(
+        leftShoulder.visibility ?? 1,
+        rightShoulder.visibility ?? 1,
+        leftHip.visibility ?? 1,
+        rightHip.visibility ?? 1,
+      );
+      sitStandRef.current.update({ torsoY, confidence: conf });
+      setReps(sitStandRef.current.reps);
+      if (conf < SIT_STAND_OPTS.minConfidence) {
+        setStatus("hard_to_see");
+        setStatusDetail("Hard to see your torso clearly.");
+      } else {
+        setStatus("tracking_well");
+        setStatusDetail(null);
+      }
+      return;
+    }
+
     const presence = checkBalancePresence({
       leftShoulder,
       rightShoulder,
       leftHip,
       rightHip,
     });
-
     if (!presence.ok) {
       setStatus("hard_to_see");
       setStatusDetail(
@@ -252,10 +384,13 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
     setStatusDetail(null);
     setReps(0);
     setElapsed(0);
+    setCalibProgress(0);
     confidenceSumRef.current = 0;
     confidenceCountRef.current = 0;
-    yawTrackerRef.current = createHeadYawTracker(YAW_OPTS);
     lastTsRef.current = 0;
+    gazeRef.current = createGazeHoldTracker(GAZE_OPTS);
+    nearFarRef.current = createNearFarTracker(NEAR_FAR_OPTS);
+    sitStandRef.current = createSitStandTracker(SIT_STAND_OPTS);
 
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
@@ -273,7 +408,6 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
       }
 
       streamRef.current = stream;
-
       const video = videoRef.current;
       if (!video) {
         stream.getTracks().forEach((t) => t.stop());
@@ -281,16 +415,16 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
         throw new Error("Video element missing.");
       }
       video.srcObject = stream;
-      await video.play().catch(() => {
-        /* autoplay may reject; stream still attached */
-      });
+      await video.play().catch(() => {});
 
       if (gen !== startGenRef.current) {
         stopCameraAndEngine();
         return;
       }
 
-      const engine = await createPoseEngine();
+      const engine = usesFace(mode)
+        ? await createFaceEngine()
+        : await createPoseEngine();
 
       if (gen !== startGenRef.current) {
         engine.close();
@@ -300,10 +434,21 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
 
       engineRef.current = engine;
 
-      startedAtRef.current = Date.now();
-      setPhase("active");
-      setStatus("hard_to_see");
-      setStatusDetail("Finding you in the frame…");
+      if (needsCalibration(mode)) {
+        calibStartedRef.current = performance.now();
+        setPhase("calibrating");
+        setStatus("tracking_well");
+        setStatusDetail(
+          mode === "face_gaze_hold"
+            ? "Look at your target and hold still…"
+            : "Sit at a mid distance for a moment…",
+        );
+      } else {
+        startedAtRef.current = Date.now();
+        setPhase("active");
+        setStatus("hard_to_see");
+        setStatusDetail("Finding you in the frame…");
+      }
       rafRef.current = requestAnimationFrame(tick);
     } catch {
       if (gen !== startGenRef.current) return;
@@ -317,54 +462,73 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
       );
       setPhase("privacy");
     } finally {
-      if (gen === startGenRef.current) {
-        setStarting(false);
-      }
+      if (gen === startGenRef.current) setStarting(false);
     }
   }
 
-  function endPractice() {
+  async function endPractice() {
+    if (saving || phase === "saving") return;
+    if (phase !== "active" && phase !== "calibrating") return;
+
     stopLoop();
 
     const durationSeconds = Math.max(
       0,
-      Math.round((Date.now() - startedAtRef.current) / 1000),
+      Math.round(
+        (Date.now() -
+          (startedAtRef.current || Date.now())) /
+          1000,
+      ),
     );
     setElapsed(durationSeconds);
 
     const confCount = confidenceCountRef.current;
     const confAvg =
       confCount > 0 ? confidenceSumRef.current / confCount : null;
-    const repCount = isGaze ? yawTrackerRef.current.reps : null;
+    const repCount = countsReps(mode) ? currentReps() : null;
 
     stopCameraAndEngine();
-    saveSawPendingRef.current = false;
     setPhase("saving");
+    setSaving(true);
+    setActionState(initialAction);
 
     const fd = new FormData();
     fd.set("exercise_id", exerciseId);
     fd.set("duration_seconds", String(durationSeconds));
-    if (repCount != null) {
-      fd.set("rep_count", String(repCount));
+    if (repCount != null) fd.set("rep_count", String(repCount));
+    if (confAvg != null) fd.set("cv_confidence_avg", confAvg.toFixed(3));
+
+    try {
+      const result = await saveCameraPracticeSession(fd);
+      setActionState(result);
+      setPhase("collapsed");
+      setStatus("idle");
+      setStatusDetail(null);
+      setElapsed(0);
+      setReps(0);
+      setCalibProgress(0);
+    } catch {
+      setActionState({
+        ok: false,
+        error: "Could not save practice. Try again or log manually below.",
+      });
+      setPhase("collapsed");
+    } finally {
+      setSaving(false);
     }
-    if (confAvg != null) {
-      fd.set("cv_confidence_avg", confAvg.toFixed(4));
-    }
-    formAction(fd);
   }
 
   const transitionClass = reducedMotion
     ? ""
     : "transition-opacity duration-200";
+  const copy = cvModeCopy(mode);
 
   if (phase === "collapsed") {
     return (
       <div
         className={`rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 py-5 ${transitionClass}`}
       >
-        <p className="text-sm text-[var(--stasus-ink-muted)]">
-          {categoryCopy(category)}
-        </p>
+        <p className="text-sm text-[var(--stasus-ink-muted)]">{copy}</p>
         {actionState.ok ? (
           <p className="mt-2 text-sm text-[var(--stasus-ink-muted)]">
             Practice saved. Nice work showing up.
@@ -399,9 +563,7 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
       <h2 className="text-lg font-semibold text-[var(--stasus-ink)]">
         Practice with camera
       </h2>
-      <p className="mt-2 text-sm text-[var(--stasus-ink-muted)]">
-        {categoryCopy(category)}
-      </p>
+      <p className="mt-2 text-sm text-[var(--stasus-ink-muted)]">{copy}</p>
 
       {phase === "privacy" ? (
         <div className="mt-4 flex flex-col gap-4">
@@ -441,7 +603,6 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
         </div>
       ) : null}
 
-      {/* Single viewport instance so stream stays attached across Start → active */}
       {showSession ? (
         <div
           className={
@@ -451,11 +612,22 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
         >
           <CameraViewport
             videoRef={videoRef}
-            showSilhouette={phase === "active" || phase === "saving"}
+            showSilhouette={
+              phase === "active" ||
+              phase === "calibrating" ||
+              phase === "saving"
+            }
           />
-          {phase === "active" || phase === "saving" ? (
+          {phase === "calibrating" ||
+          phase === "active" ||
+          phase === "saving" ? (
             <>
               <TrackingStatus status={status} detail={statusDetail} />
+              {phase === "calibrating" ? (
+                <p className="text-sm text-[var(--stasus-ink-muted)]">
+                  Calibrating… {calibProgress}%
+                </p>
+              ) : null}
               <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-[var(--stasus-ink)]">
                 <p>
                   Time:{" "}
@@ -468,9 +640,9 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
                     />
                   </span>
                 </p>
-                {isGaze ? (
+                {countsReps(mode) && phase !== "calibrating" ? (
                   <p>
-                    Head turns counted:{" "}
+                    {repLabel(mode)}:{" "}
                     <span className="font-medium">{reps}</span>
                   </p>
                 ) : null}
@@ -480,11 +652,11 @@ export function PracticeCoach({ exerciseId, category }: PracticeCoachProps) {
               </p>
               <button
                 type="button"
-                disabled={phase === "saving" || pending}
-                onClick={endPractice}
+                disabled={phase === "saving" || saving || phase === "calibrating"}
+                onClick={() => void endPractice()}
                 className="inline-flex h-11 w-fit items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white disabled:opacity-60 dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
               >
-                {phase === "saving" || pending ? "Saving…" : "End practice"}
+                {phase === "saving" || saving ? "Saving…" : "End practice"}
               </button>
               {actionState.error ? (
                 <p

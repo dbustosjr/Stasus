@@ -129,6 +129,7 @@ export default async function ExerciseDetailPage({ params }: PageProps) {
         <PracticeCoach
           exerciseId={exercise.id}
           category={exercise.category}
+          title={exercise.title}
         />
       ) : null}
 

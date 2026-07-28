@@ -12,8 +12,7 @@ export type SessionFormState = {
   ok: boolean;
 };
 
-export async function logExerciseSession(
-  _prev: SessionFormState,
+async function insertExerciseSession(
   formData: FormData,
 ): Promise<SessionFormState> {
   const { insforge, user } = await requireUser();
@@ -64,4 +63,23 @@ export async function logExerciseSession(
   revalidatePath(`/app/exercises/${exerciseId}`);
   revalidatePath("/app");
   return { ok: true, error: null };
+}
+
+/** Form / useActionState signature for the manual log form. */
+export async function logExerciseSession(
+  _prev: SessionFormState,
+  formData: FormData,
+): Promise<SessionFormState> {
+  return insertExerciseSession(formData);
+}
+
+/**
+ * Direct client await from PracticeCoach.
+ * Separate export so it is not treated as a useActionState dispatch
+ * (LogSessionForm on the same page binds logExerciseSession).
+ */
+export async function saveCameraPracticeSession(
+  formData: FormData,
+): Promise<SessionFormState> {
+  return insertExerciseSession(formData);
 }

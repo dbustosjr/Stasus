@@ -1,17 +1,11 @@
 import {
   KEY_LANDMARK_INDICES,
 } from "@/lib/cv/pose/landmarks";
-
-/**
- * CDN assets for MediaPipe Vision Tasks (not vendored in-repo).
- * WASM fileset root — matches installed @mediapipe/tasks-vision version.
- * Model — Google Cloud Storage pose_landmarker_lite.
- */
-export const MEDIAPIPE_WASM_CDN =
-  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.0/wasm";
-
-export const POSE_LANDMARKER_MODEL_URL =
-  "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task";
+import {
+  MEDIAPIPE_WASM_CDN,
+  POSE_LANDMARKER_MODEL_URL,
+  installTfLiteLogFilter,
+} from "@/lib/cv/mediapipe-assets";
 
 export type PoseLandmark = {
   x: number;
@@ -51,39 +45,50 @@ function averageKeyVisibility(landmarks: PoseLandmark[]): number {
  * only loads when this factory runs (call from client components only).
  */
 export async function createPoseEngine(): Promise<PoseEngine> {
-  const { FilesetResolver, PoseLandmarker } = await import(
-    "@mediapipe/tasks-vision"
-  );
+  const restoreLogs = installTfLiteLogFilter();
 
-  const wasm = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_CDN);
-  const landmarker = await PoseLandmarker.createFromOptions(wasm, {
-    baseOptions: {
-      modelAssetPath: POSE_LANDMARKER_MODEL_URL,
-    },
-    runningMode: "VIDEO",
-    numPoses: 1,
-  });
+  try {
+    const { FilesetResolver, PoseLandmarker } = await import(
+      "@mediapipe/tasks-vision"
+    );
 
-  return {
-    detect(video, timestampMs) {
-      const result = landmarker.detectForVideo(video, timestampMs);
-      const pose = result.landmarks[0];
-      if (!pose || pose.length === 0) return null;
+    const wasm = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_CDN);
+    const landmarker = await PoseLandmarker.createFromOptions(wasm, {
+      baseOptions: {
+        modelAssetPath: POSE_LANDMARKER_MODEL_URL,
+      },
+      runningMode: "VIDEO",
+      numPoses: 1,
+    });
 
-      const landmarks: PoseLandmark[] = pose.map((lm) => ({
-        x: lm.x,
-        y: lm.y,
-        z: lm.z,
-        visibility: lm.visibility,
-      }));
+    return {
+      detect(video, timestampMs) {
+        const result = landmarker.detectForVideo(video, timestampMs);
+        const pose = result.landmarks[0];
+        if (!pose || pose.length === 0) return null;
 
-      return {
-        landmarks,
-        confidence: averageKeyVisibility(landmarks),
-      };
-    },
-    close() {
-      landmarker.close();
-    },
-  };
+        const landmarks: PoseLandmark[] = pose.map((lm) => ({
+          x: lm.x,
+          y: lm.y,
+          z: lm.z,
+          visibility: lm.visibility,
+        }));
+
+        return {
+          landmarks,
+          confidence: averageKeyVisibility(landmarks),
+        };
+      },
+      close() {
+        try {
+          landmarker.close();
+        } finally {
+          restoreLogs();
+        }
+      },
+    };
+  } catch (error) {
+    restoreLogs();
+    throw error;
+  }
 }
