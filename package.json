@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test:red-flag": "node scripts/test-red-flag.mjs",
-    "test:head-yaw": "node --experimental-strip-types scripts/test-head-yaw.mjs"
+    "test:head-yaw": "node --experimental-strip-types scripts/test-head-yaw.mjs",
+    "test:balance-presence": "node --experimental-strip-types scripts/test-balance-presence.mjs",
+    "test:cv": "npm run test:head-yaw && npm run test:balance-presence"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
