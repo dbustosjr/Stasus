@@ -8,8 +8,9 @@ This project uses [InsForge](https://insforge.dev): Postgres, auth, storage, edg
 - **Project:** **Stasus** (API base `https://dvmy89mv.us-west.insforge.app`)
 - **Skills:** `insforge` (SDK app code), `insforge-cli` (migrations/RLS/secrets/deploy), `insforge-debug`, `insforge-integrations`
 - **Credentials:** app code reads keys from `.env.local`; the CLI reads `.insforge/project.json`. Never hardcode or commit keys.
-- **AI:** Do **not** use InsForge Model Gateway for Stasus AI. Anthropic API is direct, and only in the AI build phase.
+- **AI:** Do **not** use InsForge Model Gateway for Stasus AI. Anthropic API is direct (Next.js server actions + Edge Function `weekly-insights`).
 - **Hosting:** InsForge Sites — not Vercel.
+- **Weekly insights cron:** `functions/weekly-insights.ts` → schedule Mondays `0 15 * * 1` UTC → `POST /functions/weekly-insights` with `Authorization: Bearer ${{secrets.CRON_SECRET}}`. Secrets: `CRON_SECRET`, `ANTHROPIC_API_KEY`. Manual Generate on Insights remains.
 
 Key patterns:
 
