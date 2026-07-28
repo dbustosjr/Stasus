@@ -6,6 +6,7 @@ import {
   type TrackerFormState,
 } from "@/app/actions/tracker";
 import { PRESET_TRIGGERS, type CustomTrigger } from "@/lib/tracker/types";
+import { RED_FLAG_SIGNALS } from "@/lib/ai/red-flag";
 
 const initial: TrackerFormState = { error: null };
 
@@ -85,6 +86,32 @@ export function SymptomLogForm({
           className="h-12 rounded-xl border border-[var(--stasus-border)] bg-[var(--stasus-mist)] px-4 dark:bg-[var(--stasus-surface)]"
         />
       </label>
+
+      <fieldset className="flex flex-col gap-2 rounded-2xl border border-[var(--stasus-teal-secondary)] bg-[color-mix(in_srgb,var(--stasus-aqua)_10%,var(--stasus-surface))] px-4 py-4">
+        <legend className="px-1 text-sm font-semibold text-[var(--stasus-ink)]">
+          Emergency signal check (required awareness)
+        </legend>
+        <p className="text-xs text-[var(--stasus-ink-muted)]">
+          If sudden severe vertigo occurs with any of the other signs below,
+          saving will redirect you to emergency guidance. This is not a
+          diagnosis.
+        </p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {RED_FLAG_SIGNALS.map((signal) => (
+            <label
+              key={signal.id}
+              className="flex items-center gap-2 rounded-xl border border-[var(--stasus-border)] bg-[var(--stasus-mist)] px-3 py-2 text-sm text-[var(--stasus-ink)] dark:bg-[var(--stasus-surface)]"
+            >
+              <input
+                type="checkbox"
+                name="red_flag_signals"
+                value={signal.id}
+              />
+              {signal.label}
+            </label>
+          ))}
+        </div>
+      </fieldset>
 
       <label className="flex flex-col gap-1.5 text-sm font-medium text-[var(--stasus-ink)]">
         Notes (optional)

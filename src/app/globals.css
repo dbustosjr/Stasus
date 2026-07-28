@@ -57,6 +57,24 @@ body {
   color: var(--stasus-ink);
   font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   transition: background-color 0.2s ease, color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prefer 16px inputs on mobile to avoid iOS focus zoom */
+input,
+select,
+textarea,
+button {
+  font-size: 16px;
+}
+
+@media (min-width: 640px) {
+  input,
+  select,
+  textarea,
+  button {
+    font-size: inherit;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

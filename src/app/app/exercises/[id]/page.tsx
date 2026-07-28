@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireUser } from "@/lib/auth/require-user";
+import { requireOnboarded } from "@/lib/auth/require-onboarded";
 import { AppShell, CategoryBadge } from "@/components/app-shell";
+import { LogSessionForm } from "@/components/log-session-form";
 import {
   CATEGORY_META,
   type Exercise,
@@ -15,7 +16,7 @@ type PageProps = {
 
 export default async function ExerciseDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const { insforge, user } = await requireUser();
+  const { insforge, user } = await requireOnboarded();
 
   const { data, error } = await insforge.database
     .from("exercises")
@@ -45,6 +46,14 @@ export default async function ExerciseDetailPage({ params }: PageProps) {
 
   const meta = CATEGORY_META[exercise.category];
   const instructions = exercise.instructions;
+
+  const { data: sessions } = await insforge.database
+    .from("exercise_sessions")
+    .select("id, completed_at, duration_seconds")
+    .eq("user_id", user.id)
+    .eq("exercise_id", id)
+    .order("completed_at", { ascending: false })
+    .limit(5);
 
   return (
     <AppShell email={user.email} active="exercises">
@@ -116,6 +125,36 @@ export default async function ExerciseDetailPage({ params }: PageProps) {
             {instructions.safety_notes.map((note) => (
               <li key={note}>{note}</li>
             ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <LogSessionForm exerciseId={exercise.id} />
+
+      {sessions && sessions.length > 0 ? (
+        <section className="rounded-2xl border border-[var(--stasus-border)] px-5 py-4">
+          <h2 className="text-sm font-semibold text-[var(--stasus-ink)]">
+            Your recent practices
+          </h2>
+          <ul className="mt-3 space-y-2 text-sm text-[var(--stasus-ink-muted)]">
+            {sessions.map((row) => {
+              const s = row as {
+                id: string;
+                completed_at: string;
+                duration_seconds: number | null;
+              };
+              return (
+                <li key={s.id}>
+                  {new Date(s.completed_at).toLocaleString(undefined, {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
+                  {s.duration_seconds != null
+                    ? ` · ${s.duration_seconds}s`
+                    : ""}
+                </li>
+              );
+            })}
           </ul>
         </section>
       ) : null}

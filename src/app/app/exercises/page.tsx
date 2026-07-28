@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth/require-user";
+import { requireOnboarded } from "@/lib/auth/require-onboarded";
 import { AppShell, CategoryBadge } from "@/components/app-shell";
 import {
   CATEGORY_META,
@@ -25,7 +25,7 @@ function asExercise(row: Record<string, unknown>): Exercise {
 }
 
 export default async function ExercisesPage() {
-  const { insforge, user } = await requireUser();
+  const { insforge, user } = await requireOnboarded();
   const { data, error } = await insforge.database
     .from("exercises")
     .select(
@@ -51,7 +51,15 @@ export default async function ExercisesPage() {
         </h1>
         <p className="mt-2 max-w-2xl text-[var(--stasus-ink-muted)]">
           Condition-mapped practice cards for habituation, gaze, balance, and
-          canalith orientation — wellness tools, not diagnoses.
+          canalith orientation — wellness tools, not diagnoses. Pair practice
+          with{" "}
+          <Link
+            href="/app/calm"
+            className="font-semibold text-[var(--stasus-teal)] dark:text-[var(--stasus-aqua)]"
+          >
+            calm tools
+          </Link>{" "}
+          if hypervigilance rises afterward.
         </p>
       </div>
 

@@ -3,15 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/require-user";
+import { evaluateRedFlag, RED_FLAG_SIGNALS } from "@/lib/ai/red-flag";
 import { PRESET_TRIGGERS } from "@/lib/tracker/types";
 
 export type TrackerFormState = {
   error: string | null;
 };
 
-const presetIds = new Set(
-  PRESET_TRIGGERS.map((t) => t.id as string),
-);
+const presetIds = new Set(PRESET_TRIGGERS.map((t) => t.id as string));
+const redFlagIds = new Set(RED_FLAG_SIGNALS.map((s) => s.id as string));
 
 export async function createSymptomLog(
   _prev: TrackerFormState,
@@ -37,6 +37,10 @@ export async function createSymptomLog(
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const selected = formData.getAll("triggers").map(String);
   const customNew = String(formData.get("custom_trigger") ?? "").trim();
+  const redFlagSignals = formData
+    .getAll("red_flag_signals")
+    .map(String)
+    .filter((id) => redFlagIds.has(id));
 
   const triggers: string[] = [];
 
@@ -76,18 +80,40 @@ export async function createSymptomLog(
     ...new Set(triggers.map((t) => t.trim()).filter(Boolean)),
   ];
 
-  const { error } = await insforge.database.from("symptom_logs").insert([
-    {
-      user_id: user.id,
-      severity,
-      duration_minutes,
-      triggers: uniqueTriggers,
-      notes,
-    },
-  ]);
+  const { data: inserted, error } = await insforge.database
+    .from("symptom_logs")
+    .insert([
+      {
+        user_id: user.id,
+        severity,
+        duration_minutes,
+        triggers: uniqueTriggers,
+        notes,
+      },
+    ])
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     return { error: error.message };
+  }
+
+  const redFlag = evaluateRedFlag(redFlagSignals);
+  if (redFlag.triggered && redFlag.pattern) {
+    await insforge.database.from("red_flag_events").insert([
+      {
+        user_id: user.id,
+        symptom_log_id: inserted?.id ? String(inserted.id) : null,
+        flagged_pattern: redFlag.pattern,
+        signals: {
+          matched: redFlag.matched,
+          severity,
+        },
+      },
+    ]);
+
+    // Hard override: never continue into normal tracker/insight flow.
+    redirect("/emergency");
   }
 
   revalidatePath("/app/tracker");

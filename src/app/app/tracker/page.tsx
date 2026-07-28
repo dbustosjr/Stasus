@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth/require-user";
+import { requireOnboarded } from "@/lib/auth/require-onboarded";
 import { AppShell } from "@/components/app-shell";
+import { SeverityTrend } from "@/components/severity-trend";
 import { deleteSymptomLog } from "@/app/actions/tracker";
 import { triggerLabel, type SymptomLog } from "@/lib/tracker/types";
 
@@ -19,7 +20,7 @@ function asLog(row: Record<string, unknown>): SymptomLog {
 }
 
 export default async function TrackerPage() {
-  const { insforge, user } = await requireUser();
+  const { insforge, user } = await requireOnboarded();
 
   const { data, error } = await insforge.database
     .from("symptom_logs")
@@ -29,6 +30,10 @@ export default async function TrackerPage() {
     .limit(50);
 
   const logs = (data ?? []).map((row) => asLog(row as Record<string, unknown>));
+  const trendPoints = logs.slice(0, 14).map((log) => ({
+    severity: log.severity,
+    logged_at: log.logged_at,
+  }));
 
   return (
     <AppShell email={user.email} active="tracker">
@@ -39,15 +44,24 @@ export default async function TrackerPage() {
           </h1>
           <p className="mt-2 max-w-2xl text-[var(--stasus-ink-muted)]">
             Log severity, duration, and triggers at your own pace. Entries are
-            private to your account.
+            private to your account. After logging, calm tools are available if
+            checking urges rise.
           </p>
         </div>
-        <Link
-          href="/app/tracker/new"
-          className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
-        >
-          New entry
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/app/calm"
+            className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 text-sm font-semibold text-[var(--stasus-ink)]"
+          >
+            Calm tools
+          </Link>
+          <Link
+            href="/app/tracker/new"
+            className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
+          >
+            New entry
+          </Link>
+        </div>
       </div>
 
       {error ? (
@@ -55,6 +69,8 @@ export default async function TrackerPage() {
           Could not load entries: {error.message}
         </p>
       ) : null}
+
+      <SeverityTrend points={trendPoints} />
 
       {logs.length === 0 ? (
         <div className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-6 py-10 text-center">

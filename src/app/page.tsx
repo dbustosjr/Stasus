@@ -19,33 +19,33 @@ export default function Home() {
 
       <SiteHeader />
 
-      <main className="relative z-10 flex flex-1 flex-col justify-center px-6 pb-16 pt-6 md:px-10 md:pb-24">
-        <div className="mx-auto grid w-full max-w-5xl items-center gap-12 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:gap-16">
-          <div className="flex flex-col items-start gap-6">
+      <main className="relative z-10 flex flex-1 flex-col justify-center px-4 pb-12 pt-4 sm:px-6 sm:pb-16 sm:pt-6 md:px-10 md:pb-24">
+        <div className="mx-auto grid w-full max-w-5xl items-center gap-8 sm:gap-12 md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] md:gap-16">
+          <div className="flex flex-col items-start gap-5 sm:gap-6">
             <p className="text-sm font-medium tracking-wide text-[var(--stasus-ink-muted)]">
               Vestibular wellness
             </p>
-            <h1 className="max-w-xl text-4xl font-bold leading-tight tracking-tight text-[var(--stasus-ink)] md:text-5xl">
+            <h1 className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-[var(--stasus-ink)] sm:text-4xl md:text-5xl">
               Steadier days, built around your symptoms.
             </h1>
-            <p className="max-w-lg text-lg font-normal leading-relaxed text-[var(--stasus-ink-muted)]">
+            <p className="max-w-lg text-base font-normal leading-relaxed text-[var(--stasus-ink-muted)] sm:text-lg">
               Track what flares, practice condition-mapped rehab exercises, and
               calm the hypervigilance loop — without diagnostic claims.
             </p>
-            <div className="flex flex-wrap items-center gap-3 pt-2">
+            <div className="flex w-full flex-col items-stretch gap-3 pt-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
               <a
                 href="/signup"
                 className="inline-flex h-12 items-center justify-center rounded-full bg-[var(--stasus-teal)] px-6 text-base font-semibold text-white transition-colors hover:bg-[var(--stasus-teal-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)] dark:bg-[var(--stasus-aqua)] dark:text-[#001219] dark:hover:bg-[#9ec9c6]"
               >
                 Get started
               </a>
-              <span className="text-sm text-[var(--stasus-ink-muted)]">
+              <span className="text-center text-sm text-[var(--stasus-ink-muted)] sm:text-left">
                 Light & dark · motion-safe by design
               </span>
             </div>
           </div>
 
-          <div className="relative flex items-center justify-center">
+          <div className="relative order-first flex items-center justify-center md:order-none">
             <div className="absolute inset-8 rounded-full bg-[color-mix(in_srgb,var(--stasus-aqua)_20%,transparent)] blur-3xl dark:bg-[color-mix(in_srgb,var(--stasus-aqua)_12%,transparent)]" />
             <Image
               src="/brand/mark-light.png"
@@ -53,7 +53,7 @@ export default function Home() {
               width={480}
               height={508}
               priority
-              className="relative h-auto w-72 drop-shadow-sm md:w-96 dark:hidden"
+              className="relative h-auto w-40 drop-shadow-sm sm:w-56 md:w-72 lg:w-96 dark:hidden"
             />
             <Image
               src="/brand/mark-dark.png"
@@ -61,22 +61,21 @@ export default function Home() {
               width={480}
               height={508}
               priority
-              className="relative hidden h-auto w-72 drop-shadow-sm md:w-96 dark:block"
+              className="relative hidden h-auto w-40 drop-shadow-sm sm:w-56 md:w-72 lg:w-96 dark:block"
             />
           </div>
         </div>
 
         <section
           id="get-started"
-          className="mx-auto mt-20 w-full max-w-5xl rounded-[1.5rem] border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-6 py-8 md:px-10"
+          className="mx-auto mt-12 w-full max-w-5xl rounded-[1.5rem] border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 py-6 sm:mt-20 sm:px-6 sm:py-8 md:px-10"
         >
           <h2 className="text-xl font-semibold text-[var(--stasus-ink)]">
-            Building in the open
+            Built for steadier days
           </h2>
           <p className="mt-2 max-w-2xl text-[var(--stasus-ink-muted)]">
-            You&apos;re looking at the Stasus shell — brand, theme, and InsForge
-            foundation. Exercise library, tracker, and AI assistant land next,
-            in that order.
+            Symptom tracking, condition-mapped exercises, calm tools, and weekly
+            insights — available in the browser, including from your home screen.
           </p>
         </section>
       </main>

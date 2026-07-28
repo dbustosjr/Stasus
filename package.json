@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test:red-flag": "node scripts/test-red-flag.mjs"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
     "@insforge/sdk": "^1.5.1",
     "next": "16.2.12",
     "react": "19.2.4",

@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth/require-user";
+import { requireOnboarded } from "@/lib/auth/require-onboarded";
 import { AppShell } from "@/components/app-shell";
 import { SymptomLogForm } from "@/components/symptom-log-form";
 import type { CustomTrigger } from "@/lib/tracker/types";
 
 export default async function NewTrackerEntryPage() {
-  const { insforge, user } = await requireUser();
+  const { insforge, user } = await requireOnboarded();
 
   const { data } = await insforge.database
     .from("custom_triggers")
@@ -32,9 +32,20 @@ export default async function NewTrackerEntryPage() {
         </h1>
         <p className="mt-2 max-w-xl text-[var(--stasus-ink-muted)]">
           Capture what you notice. No reactive coaching here — just your
-          record.
+          record. If checking urges spike afterward, open Calm tools once.
         </p>
       </div>
+
+      <p className="max-w-xl text-sm text-[var(--stasus-ink-muted)]">
+        Emergency: sudden severe vertigo with slurred speech, facial drooping,
+        limb weakness, or sudden severe headache → seek emergency care.{" "}
+        <Link
+          href="/app/calm"
+          className="font-semibold text-[var(--stasus-teal)] dark:text-[var(--stasus-aqua)]"
+        >
+          Calm tools
+        </Link>
+      </p>
 
       <div className="max-w-xl rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-6 py-6">
         <SymptomLogForm customTriggers={customTriggers} />
