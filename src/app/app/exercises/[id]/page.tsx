@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireOnboarded } from "@/lib/auth/require-onboarded";
 import { AppShell, CategoryBadge } from "@/components/app-shell";
+import { PracticeCoach } from "@/components/cv/practice-coach";
 import { LogSessionForm } from "@/components/log-session-form";
 import {
   CATEGORY_META,
@@ -71,11 +72,6 @@ export default async function ExerciseDetailPage({ params }: PageProps) {
               Level {exercise.difficulty_level}
             </span>
           ) : null}
-          {exercise.requires_cv_tracking ? (
-            <span className="text-sm text-[var(--stasus-ink-muted)]">
-              Webcam check planned later
-            </span>
-          ) : null}
         </div>
         <h1 className="mt-3 text-3xl font-bold tracking-tight text-[var(--stasus-ink)]">
           {exercise.title}
@@ -127,6 +123,13 @@ export default async function ExerciseDetailPage({ params }: PageProps) {
             ))}
           </ul>
         </section>
+      ) : null}
+
+      {exercise.requires_cv_tracking ? (
+        <PracticeCoach
+          exerciseId={exercise.id}
+          category={exercise.category}
+        />
       ) : null}
 
       <LogSessionForm exerciseId={exercise.id} />
