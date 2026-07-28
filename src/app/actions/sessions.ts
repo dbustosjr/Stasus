@@ -2,6 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/require-user";
+import {
+  parseCvConfidenceAvg,
+  parseRepCount,
+} from "@/lib/sessions/parse-cv-fields";
 
 export type SessionFormState = {
   error: string | null;
@@ -28,6 +32,18 @@ export async function logExerciseSession(
     }
   }
 
+  const repParsed = parseRepCount(String(formData.get("rep_count") ?? ""));
+  if (!repParsed.ok) {
+    return { ok: false, error: repParsed.error };
+  }
+
+  const confidenceParsed = parseCvConfidenceAvg(
+    String(formData.get("cv_confidence_avg") ?? ""),
+  );
+  if (!confidenceParsed.ok) {
+    return { ok: false, error: confidenceParsed.error };
+  }
+
   const notes = String(formData.get("notes") ?? "").trim() || null;
 
   const { error } = await insforge.database.from("exercise_sessions").insert([
@@ -35,6 +51,8 @@ export async function logExerciseSession(
       user_id: user.id,
       exercise_id: exerciseId,
       duration_seconds,
+      rep_count: repParsed.value,
+      cv_confidence_avg: confidenceParsed.value,
       notes,
     },
   ]);

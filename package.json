@@ -10,7 +10,8 @@
     "test:red-flag": "node scripts/test-red-flag.mjs",
     "test:head-yaw": "node --experimental-strip-types scripts/test-head-yaw.mjs",
     "test:balance-presence": "node --experimental-strip-types scripts/test-balance-presence.mjs",
-    "test:cv": "npm run test:head-yaw && npm run test:balance-presence"
+    "test:session-cv-fields": "node --experimental-strip-types scripts/test-session-cv-fields.mjs",
+    "test:cv": "npm run test:head-yaw && npm run test:balance-presence && npm run test:session-cv-fields"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
