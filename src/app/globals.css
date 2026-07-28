@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+/* Class-based dark mode (theme toggle), not only prefers-color-scheme */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* PRD §5 — light */
+  --stasus-teal: #014152;
+  --stasus-teal-secondary: #056179;
+  --stasus-aqua: #7fb8b1;
+  --stasus-gold: #e59b35;
+  --stasus-mist: #ffffff;
+  --stasus-surface: #f6fafa;
+  --stasus-border: #ddebec;
+  --stasus-ink: #014152;
+  --stasus-ink-muted: #056179;
+  --stasus-bg: #ffffff;
+  --background: var(--stasus-bg);
+  --foreground: var(--stasus-ink);
+}
+
+.dark {
+  --stasus-teal: #7fb8b1;
+  --stasus-teal-secondary: #7fb8b1;
+  --stasus-aqua: #7fb8b1;
+  --stasus-gold: #e59b35;
+  --stasus-mist: #001219;
+  --stasus-surface: #062a34;
+  --stasus-border: #0d3d4a;
+  --stasus-ink: #e8f4f4;
+  --stasus-ink-muted: #9ec9c6;
+  --stasus-bg: #001219;
+  --background: var(--stasus-bg);
+  --foreground: var(--stasus-ink);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-manrope);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--stasus-bg);
+  color: var(--stasus-ink);
+  font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+::selection {
+  background: color-mix(in srgb, var(--stasus-aqua) 45%, transparent);
+}
