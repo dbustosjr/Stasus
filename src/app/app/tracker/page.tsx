@@ -20,20 +20,16 @@ function asLog(row: Record<string, unknown>): SymptomLog {
 }
 
 export default async function TrackerPage() {
-  const { insforge, user } = await requireOnboarded();
+  const { insforge, user, profile } = await requireOnboarded();
 
   const { data, error } = await insforge.database
     .from("symptom_logs")
     .select("id, severity, duration_minutes, triggers, notes, logged_at")
     .eq("user_id", user.id)
     .order("logged_at", { ascending: false })
-    .limit(50);
+    .limit(200);
 
   const logs = (data ?? []).map((row) => asLog(row as Record<string, unknown>));
-  const trendPoints = logs.slice(0, 14).map((log) => ({
-    severity: log.severity,
-    logged_at: log.logged_at,
-  }));
 
   return (
     <AppShell email={user.email} active="tracker">
@@ -70,7 +66,7 @@ export default async function TrackerPage() {
         </p>
       ) : null}
 
-      <SeverityTrend points={trendPoints} />
+      <SeverityTrend logs={logs} timeZone={profile.timezone} />
 
       {logs.length === 0 ? (
         <div className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-6 py-10 text-center">
@@ -90,7 +86,8 @@ export default async function TrackerPage() {
           {logs.map((log) => (
             <li
               key={log.id}
-              className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 py-4"
+              id={`log-${log.id}`}
+              className="scroll-mt-24 rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 py-4 transition-[box-shadow,border-color] duration-500 data-[highlight=true]:border-[var(--stasus-aqua)] data-[highlight=true]:shadow-[0_0_0_1px_var(--stasus-aqua)]"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
