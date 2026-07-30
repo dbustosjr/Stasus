@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { WebcamDemo } from "@/components/webcam-demo";
+import { LandingSeverityDemo } from "@/components/landing-severity-demo";
 
 /**
  * Persuade landing — editorial calm, brand-first, motion-safe.
@@ -51,7 +52,7 @@ export default async function Home({
             </h1>
             <p className="mt-5 max-w-md text-base leading-relaxed text-[color-mix(in_srgb,white_78%,transparent)] sm:text-lg">
               A quiet place to notice what flares, practice mapped rehab, and
-              ease the checking loop — without turning your body into a
+              ease the checking loop, without turning your body into a
               diagnosis.
             </p>
             <div className="mt-8 flex w-full flex-col gap-5 sm:w-fit">
@@ -89,8 +90,8 @@ export default async function Home({
               See how a calm head-movement check looks in Stasus.
             </h2>
             <p className="mt-3 max-w-xl text-base leading-relaxed text-[var(--stasus-ink-muted)] sm:text-lg">
-              Optional camera support for practice — metadata only, nothing
-              recorded. Tap play when you’re ready; nothing starts on its own.
+              Optional camera support for practice. Metadata only; nothing is
+              recorded. Tap play when you’re ready. Nothing starts on its own.
             </p>
           </div>
           <WebcamDemo />
@@ -105,9 +106,9 @@ export default async function Home({
           </h2>
           <p className="max-w-lg text-base leading-relaxed text-[var(--stasus-ink-muted)] sm:text-lg">
             Stasus is for people living with dizziness, imbalance, and the
-            worry that follows — diagnosed or not. You log what you notice,
-            practice what fits, and get a weekly look at patterns. No scores to
-            chase. No lecture after every entry.
+            worry that follows, whether or not you have a diagnosis. You log
+            what you notice, practice what fits, and get a weekly look at
+            patterns. No scores to chase. No lecture after every entry.
           </p>
         </div>
       </section>
@@ -119,36 +120,79 @@ export default async function Home({
             What you can do here
           </p>
           <ul className="mt-8 divide-y divide-[var(--stasus-border)] border-y border-[var(--stasus-border)]">
-            {[
-              {
-                title: "Notice what flares",
-                body: "Severity, duration, and the triggers that keep showing up — weather, screens, sleep, stress, or your own note.",
-              },
-              {
-                title: "Practice with a map, not a guess",
-                body: "Habituation, gaze, balance, and canalith orientation — guided for comfort, with optional camera checks when they help.",
-              },
-              {
-                title: "Calm the checking loop",
-                body: "Short tools for the fear–avoidance spiral, so attention can soften without pretending symptoms aren’t real.",
-              },
-              {
-                title: "A weekly letter to yourself",
-                body: "Pattern-level insights once a week — plain language, no diagnosis, nothing reactive after every log.",
-              },
-            ].map((item) => (
-              <li
-                key={item.title}
-                className="grid gap-3 py-8 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] sm:gap-10"
-              >
+            <li className="grid gap-3 py-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-10">
+              <div>
                 <h3 className="font-display text-2xl font-medium text-[var(--stasus-ink)]">
-                  {item.title}
+                  Notice what flares
                 </h3>
-                <p className="text-base leading-relaxed text-[var(--stasus-ink-muted)]">
-                  {item.body}
-                </p>
-              </li>
-            ))}
+                <LandingSeverityDemo />
+              </div>
+              <p className="text-base leading-relaxed text-[var(--stasus-ink-muted)] lg:pt-1">
+                Severity, duration, and the triggers that keep showing up:
+                weather, screens, sleep, stress, or your own note. Trends are
+                interactive. Inspect a day, change the window, and jump back to
+                the log.
+              </p>
+            </li>
+
+            <li className="grid gap-3 py-8 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] sm:gap-10">
+              <h3 className="font-display text-2xl font-medium text-[var(--stasus-ink)]">
+                Practice with a map, not a guess
+              </h3>
+              <p className="text-base leading-relaxed text-[var(--stasus-ink-muted)]">
+                Habituation, gaze, balance, and canalith orientation, guided for
+                comfort, with optional camera checks when they help. See the
+                camera demo above for how a calm check looks.
+              </p>
+            </li>
+
+            <li className="grid gap-3 py-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-10">
+              <div>
+                <h3 className="font-display text-2xl font-medium text-[var(--stasus-ink)]">
+                  Calm the checking loop
+                </h3>
+                <div
+                  className="mt-5 max-w-md border-y border-[var(--stasus-border)] py-4"
+                  aria-label="Example calm prompts"
+                >
+                  <p className="text-xs font-medium tracking-wide text-[var(--stasus-ink-muted)] uppercase">
+                    Example · quiet prompts
+                  </p>
+                  <ul className="mt-3 space-y-2.5 text-sm leading-relaxed text-[var(--stasus-ink)]">
+                    <li>Name the urge to check, without acting on it yet.</li>
+                    <li>Soften the jaw and unclench the hands.</li>
+                    <li>Choose one planned next step, not another scan.</li>
+                  </ul>
+                </div>
+              </div>
+              <p className="text-base leading-relaxed text-[var(--stasus-ink-muted)] lg:pt-1">
+                Short tools for the fear-avoidance spiral, so attention can
+                soften without pretending symptoms aren’t real.
+              </p>
+            </li>
+
+            <li className="grid gap-3 py-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-10">
+              <div>
+                <h3 className="font-display text-2xl font-medium text-[var(--stasus-ink)]">
+                  A weekly letter to yourself
+                </h3>
+                <blockquote className="mt-5 max-w-md border-l-2 border-[var(--stasus-aqua)] pl-4">
+                  <p className="text-xs font-medium tracking-wide text-[var(--stasus-ink-muted)] uppercase">
+                    Example
+                  </p>
+                  <p className="mt-2 font-display text-base leading-relaxed text-[var(--stasus-ink)]">
+                    A few tougher evenings mid-week, with sleep showing up often.
+                    Nothing here is a grade. Just a gentle look at what clustered,
+                    and room to rest when things spiked.
+                  </p>
+                </blockquote>
+              </div>
+              <p className="text-base leading-relaxed text-[var(--stasus-ink-muted)] lg:pt-1">
+                Pattern-level insights once a week in plain language. No
+                diagnosis, and nothing reactive after every log. Daily and
+                monthly notes are there too when they help.
+              </p>
+            </li>
           </ul>
         </div>
       </section>
@@ -166,7 +210,7 @@ export default async function Home({
             </h2>
             <p className="mt-3 text-base text-[color-mix(in_srgb,white_78%,transparent)]">
               Start with what you’re feeling. You can share a condition label
-              later — or never.
+              later, or never.
             </p>
           </div>
           <Link
@@ -184,7 +228,7 @@ export default async function Home({
             Stasus
           </p>
           <p className="max-w-md text-sm leading-relaxed text-[var(--stasus-ink-muted)]">
-            Wellness support for vestibular symptoms — not a clinic, not a
+            Wellness support for vestibular symptoms. Not a clinic, and not a
             diagnosis engine. Built to stay calm on purpose.
           </p>
         </div>
