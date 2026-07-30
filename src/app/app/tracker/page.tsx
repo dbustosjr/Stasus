@@ -2,8 +2,9 @@ import Link from "next/link";
 import { requireOnboarded } from "@/lib/auth/require-onboarded";
 import { AppShell } from "@/components/app-shell";
 import { SeverityTrend } from "@/components/severity-trend";
-import { deleteSymptomLog } from "@/app/actions/tracker";
-import { triggerLabel, type SymptomLog } from "@/lib/tracker/types";
+import { SymptomLogCard } from "@/components/symptom-log-card";
+import { TrackerEntrySection } from "@/components/tracker-entry-section";
+import { type SymptomLog } from "@/lib/tracker/types";
 
 function asLog(row: Record<string, unknown>): SymptomLog {
   return {
@@ -16,6 +17,10 @@ function asLog(row: Record<string, unknown>): SymptomLog {
     triggers: Array.isArray(row.triggers) ? (row.triggers as string[]) : [],
     notes: (row.notes as string | null) ?? null,
     logged_at: String(row.logged_at),
+    archived_at:
+      row.archived_at === null || row.archived_at === undefined
+        ? null
+        : String(row.archived_at),
   };
 }
 
@@ -24,12 +29,16 @@ export default async function TrackerPage() {
 
   const { data, error } = await insforge.database
     .from("symptom_logs")
-    .select("id, severity, duration_minutes, triggers, notes, logged_at")
+    .select(
+      "id, severity, duration_minutes, triggers, notes, logged_at, archived_at",
+    )
     .eq("user_id", user.id)
     .order("logged_at", { ascending: false })
     .limit(200);
 
   const logs = (data ?? []).map((row) => asLog(row as Record<string, unknown>));
+  const saved = logs.filter((log) => !log.archived_at);
+  const archived = logs.filter((log) => Boolean(log.archived_at));
 
   return (
     <AppShell email={user.email} active="tracker">
@@ -66,12 +75,12 @@ export default async function TrackerPage() {
         </p>
       ) : null}
 
-      <SeverityTrend logs={logs} timeZone={profile.timezone} />
+      <SeverityTrend logs={saved} timeZone={profile.timezone} />
 
       {logs.length === 0 ? (
         <div className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-6 py-10 text-center">
           <p className="text-[var(--stasus-ink-muted)]">
-            No entries yet. When something flares, capture it here — neutrally,
+            No entries yet. When something flares, capture it here neutrally,
             without judgment.
           </p>
           <Link
@@ -82,58 +91,38 @@ export default async function TrackerPage() {
           </Link>
         </div>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {logs.map((log) => (
-            <li
-              key={log.id}
-              id={`log-${log.id}`}
-              className="scroll-mt-24 rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 py-4 transition-[box-shadow,border-color] duration-500 data-[highlight=true]:border-[var(--stasus-aqua)] data-[highlight=true]:shadow-[0_0_0_1px_var(--stasus-aqua)]"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm text-[var(--stasus-ink-muted)]">
-                    {new Date(log.logged_at).toLocaleString(undefined, {
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    })}
-                  </p>
-                  <p className="mt-1 text-lg font-semibold text-[var(--stasus-ink)]">
-                    Severity {log.severity}/10
-                    {log.duration_minutes !== null
-                      ? ` · ${log.duration_minutes} min`
-                      : ""}
-                  </p>
-                </div>
-                <form action={deleteSymptomLog}>
-                  <input type="hidden" name="id" value={log.id} />
-                  <button
-                    type="submit"
-                    className="text-sm text-[var(--stasus-ink-muted)] hover:text-[var(--stasus-ink)]"
-                  >
-                    Delete
-                  </button>
-                </form>
-              </div>
-              {log.triggers.length > 0 ? (
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {log.triggers.map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-full bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] px-3 py-1 text-xs font-medium text-[var(--stasus-ink)]"
-                    >
-                      {triggerLabel(t)}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-              {log.notes ? (
-                <p className="mt-3 text-sm leading-relaxed text-[var(--stasus-ink-muted)]">
-                  {log.notes}
-                </p>
-              ) : null}
-            </li>
-          ))}
-        </ul>
+        <div className="flex flex-col gap-4">
+          <TrackerEntrySection
+            title="Saved entries"
+            count={saved.length}
+            defaultOpen
+            empty={
+              <p className="text-sm text-[var(--stasus-ink-muted)]">
+                No saved entries. New logs land here, or restore one from
+                Archived.
+              </p>
+            }
+          >
+            {saved.map((log) => (
+              <SymptomLogCard key={log.id} log={log} />
+            ))}
+          </TrackerEntrySection>
+
+          <TrackerEntrySection
+            title="Archived entries"
+            count={archived.length}
+            empty={
+              <p className="text-sm text-[var(--stasus-ink-muted)]">
+                Nothing archived yet. Use Archive on a saved entry to move it
+                here.
+              </p>
+            }
+          >
+            {archived.map((log) => (
+              <SymptomLogCard key={log.id} log={log} archived />
+            ))}
+          </TrackerEntrySection>
+        </div>
       )}
     </AppShell>
   );

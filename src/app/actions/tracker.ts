@@ -233,3 +233,32 @@ export async function deleteSymptomLog(formData: FormData) {
 
   revalidatePath("/app/tracker");
 }
+
+export async function archiveSymptomLog(formData: FormData) {
+  const { insforge, user } = await requireUser();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  await insforge.database
+    .from("symptom_logs")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .is("archived_at", null);
+
+  revalidatePath("/app/tracker");
+}
+
+export async function unarchiveSymptomLog(formData: FormData) {
+  const { insforge, user } = await requireUser();
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  await insforge.database
+    .from("symptom_logs")
+    .update({ archived_at: null })
+    .eq("id", id)
+    .eq("user_id", user.id);
+
+  revalidatePath("/app/tracker");
+}

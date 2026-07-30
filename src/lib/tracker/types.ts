@@ -16,6 +16,7 @@ export type SymptomLog = {
   triggers: string[];
   notes: string | null;
   logged_at: string;
+  archived_at: string | null;
 };
 
 export type CustomTrigger = {
