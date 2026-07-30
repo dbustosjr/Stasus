@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { WebcamDemo } from "@/components/webcam-demo";
 
 /**
  * Persuade landing — editorial calm, brand-first, motion-safe.
@@ -26,7 +26,7 @@ export default function Home() {
 
         <SiteHeader />
 
-        <div className="relative z-10 mx-auto flex min-h-[min(78vh,44rem)] w-full max-w-6xl flex-col justify-center gap-10 px-4 pb-14 pt-6 sm:px-6 sm:pb-20 md:flex-row md:items-end md:justify-between md:px-10 md:pb-24 md:pt-4">
+        <div className="relative z-10 mx-auto flex min-h-[min(78vh,44rem)] w-full max-w-6xl flex-col justify-center px-4 pb-14 pt-6 sm:px-6 sm:pb-20 md:px-10 md:pb-24 md:pt-4">
           <div className="max-w-xl animate-[stasus-rise_0.7s_ease-out_both]">
             <p className="text-sm font-medium tracking-[0.14em] text-[color-mix(in_srgb,white_72%,transparent)] uppercase">
               Vestibular wellness
@@ -60,23 +60,25 @@ export default function Home() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="flex justify-center md:justify-end md:pb-4">
-            <div className="relative animate-[stasus-rise_0.85s_ease-out_0.08s_both]">
-              <div
-                aria-hidden
-                className="absolute inset-6 rounded-full bg-[color-mix(in_srgb,var(--stasus-aqua)_35%,transparent)] blur-3xl"
-              />
-              <Image
-                src="/brand/mark-dark.png"
-                alt=""
-                width={480}
-                height={508}
-                priority
-                className="relative h-auto w-40 drop-shadow-lg sm:w-56 md:w-80 lg:w-[22rem]"
-              />
-            </div>
+      {/* Webcam practice demo — click to play */}
+      <section className="border-b border-[var(--stasus-border)] bg-[var(--stasus-bg)] px-4 py-16 sm:px-6 md:px-10 md:py-24">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 md:gap-10">
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold tracking-[0.12em] text-[var(--stasus-ink-muted)] uppercase">
+              Practice with camera
+            </p>
+            <h2 className="font-display mt-3 text-3xl font-medium leading-tight tracking-tight text-[var(--stasus-ink)] sm:text-4xl">
+              See how a calm head-movement check looks in Stasus.
+            </h2>
+            <p className="mt-3 max-w-xl text-base leading-relaxed text-[var(--stasus-ink-muted)] sm:text-lg">
+              Optional camera support for practice — metadata only, nothing
+              recorded. Tap play when you’re ready; nothing starts on its own.
+            </p>
           </div>
+          <WebcamDemo />
         </div>
       </section>
 
