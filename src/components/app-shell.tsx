@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
 import { SiteHeader } from "@/components/site-header";
+import { TimezoneSync } from "@/components/timezone-sync";
 import { CATEGORY_META, type ExerciseCategory } from "@/lib/exercises/types";
 
 type AppShellProps = {
@@ -60,6 +61,7 @@ export function AppShell({ children, email, active = "home" }: AppShellProps) {
       <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-5 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8 md:py-10">
         {children}
       </main>
+      <TimezoneSync />
     </div>
   );
 }

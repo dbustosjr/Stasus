@@ -5,6 +5,12 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/require-user";
 import { evaluateRedFlag, RED_FLAG_SIGNALS } from "@/lib/ai/red-flag";
 import { PRESET_TRIGGERS } from "@/lib/tracker/types";
+import { recordActivityDay } from "@/app/actions/activity";
+import { getAiModels, runDailyInsight } from "@/lib/ai/anthropic";
+import {
+  localDateString,
+  normalizeTimeZone,
+} from "@/lib/time/local-calendar";
 
 export type TrackerFormState = {
   error: string | null;
@@ -98,12 +104,14 @@ export async function createSymptomLog(
     return { error: error.message };
   }
 
+  const logId = inserted?.id ? String(inserted.id) : null;
+
   const redFlag = evaluateRedFlag(redFlagSignals);
   if (redFlag.triggered && redFlag.pattern) {
     await insforge.database.from("red_flag_events").insert([
       {
         user_id: user.id,
-        symptom_log_id: inserted?.id ? String(inserted.id) : null,
+        symptom_log_id: logId,
         flagged_pattern: redFlag.pattern,
         signals: {
           matched: redFlag.matched,
@@ -116,7 +124,68 @@ export async function createSymptomLog(
     redirect("/emergency");
   }
 
+  try {
+    await recordActivityDay("symptom_log");
+  } catch {
+    // Activity stamp must not block the log.
+  }
+
+  if (logId && process.env.ANTHROPIC_API_KEY) {
+    try {
+      const { data: profile } = await insforge.database
+        .from("profiles")
+        .select("timezone")
+        .eq("id", user.id)
+        .maybeSingle();
+      const tz = normalizeTimeZone(
+        profile && typeof profile === "object" && "timezone" in profile
+          ? String((profile as { timezone?: string }).timezone)
+          : "UTC",
+      );
+      const periodStart = localDateString(tz);
+      const models = getAiModels();
+
+      await insforge.database.from("ai_call_log").insert([
+        {
+          user_id: user.id,
+          purpose: "daily_insight",
+          model_used: models.haiku,
+        },
+      ]);
+
+      const insight = await runDailyInsight({
+        log: {
+          severity,
+          duration_minutes,
+          triggers: uniqueTriggers,
+          notes,
+        },
+      });
+
+      await insforge.database.from("ai_insights").insert([
+        {
+          user_id: user.id,
+          week_start: periodStart,
+          period_start: periodStart,
+          cadence: "daily",
+          source_log_id: logId,
+          insight_text: insight.text,
+          model_used: insight.model,
+          analysis_json: {
+            severity,
+            duration_minutes,
+            triggers: uniqueTriggers,
+          },
+          generated_at: new Date().toISOString(),
+        },
+      ]);
+    } catch {
+      // Soft-fail: symptom log already saved.
+    }
+  }
+
   revalidatePath("/app/tracker");
+  revalidatePath("/app/insights");
   redirect("/app/tracker");
 }
 

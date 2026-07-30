@@ -53,6 +53,9 @@ export function BreathingGuide() {
         setRunning(false);
         setPhase("rest");
         setSecondsLeft(0);
+        void import("@/app/actions/activity").then(({ recordActivityDay }) =>
+          recordActivityDay("calm").catch(() => undefined),
+        );
         return;
       }
 

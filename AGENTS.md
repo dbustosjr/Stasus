@@ -10,7 +10,9 @@ This project uses [InsForge](https://insforge.dev): Postgres, auth, storage, edg
 - **Credentials:** app code reads keys from `.env.local`; the CLI reads `.insforge/project.json`. Never hardcode or commit keys.
 - **AI:** Do **not** use InsForge Model Gateway for Stasus AI. Anthropic API is direct (Next.js server actions + Edge Function `weekly-insights`).
 - **Hosting:** InsForge Sites — not Vercel.
-- **Weekly insights cron:** `functions/weekly-insights.ts` → schedule Mondays `0 15 * * 1` UTC → `POST /functions/weekly-insights` with `Authorization: Bearer ${{secrets.CRON_SECRET}}`. Secrets: `CRON_SECRET`, `ANTHROPIC_API_KEY`. Manual Generate on Insights remains.
+- **Weekly insights cron:** `functions/weekly-insights.ts` → schedule Mondays `0 15 * * 1` UTC → `POST /functions/weekly-insights` with `Authorization: Bearer ${{secrets.CRON_SECRET}}`. Uses each user’s `profiles.timezone` for week bounds. Secrets: `CRON_SECRET`, `ANTHROPIC_API_KEY`. Manual Generate on Insights remains.
+- **Monthly insights cron:** `functions/monthly-insights.ts` → daily `0 16 * * *` UTC; generates prior-month letters only when the user’s local date is the 1st. Same secrets. Insights also lazy-calls `ensureMonthlyInsight` on page load.
+- **Daily insights:** generated in `createSymptomLog` after each non–red-flag log (Haiku). Standing medical disclaimer on all cadences.
 
 Key patterns:
 

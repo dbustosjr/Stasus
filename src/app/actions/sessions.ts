@@ -60,6 +60,13 @@ async function insertExerciseSession(
     return { ok: false, error: error.message };
   }
 
+  try {
+    const { recordActivityDay } = await import("@/app/actions/activity");
+    await recordActivityDay("exercise");
+  } catch {
+    // ignore
+  }
+
   revalidatePath(`/app/exercises/${exerciseId}`);
   revalidatePath("/app");
   return { ok: true, error: null };

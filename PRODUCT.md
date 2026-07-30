@@ -8,11 +8,12 @@ Adults 18–65 with vestibular symptoms (PPPD, BPPV, vestibular migraine, undiag
 
 ## v1 product pillars
 
-1. Condition-mapped vestibular rehab exercise library (+ webcam form tracking later)
+1. Condition-mapped vestibular rehab exercise library (+ optional webcam practice)
 2. Symptom & trigger tracker
 3. Hypervigilance / anxiety reduction tools
-4. AI assistant (weekly insights; red-flag escalation) — Anthropic direct, later phase
-5. Web/PWA on InsForge Sites with light + dark, motion-safe UI
+4. AI notes — daily (after each log), weekly, monthly — Anthropic direct; red-flag escalation
+5. Web/PWA on InsForge Sites, **dark-only**, motion-safe UI
+6. Usage metrics — personal + admin DAU/WAU/MAU from meaningful actions (local timezone)
 
 ## Non-goals (v1)
 

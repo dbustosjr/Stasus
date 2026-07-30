@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { withDisclaimer } from "@/lib/ai/disclaimer";
 
 const HAIKU_MODEL =
   process.env.ANTHROPIC_HAIKU_MODEL ?? "claude-haiku-4-5-20251001";
@@ -91,6 +92,7 @@ Hard rules:
 - Calm and non-punitive. Missed days are fine.
 - If the week is sparse, say so kindly and keep it short.
 - If emergency-adjacent clusters appear, do NOT diagnose — briefly remind them the app has emergency cues.
+- Do not write a medical disclaimer footer; the app adds one separately.
 - Keep under 160 words. No emojis. No model/meta commentary.`,
     messages: [
       {
@@ -112,7 +114,93 @@ ${JSON.stringify(payload.analysis)}`,
     throw new Error("Sonnet returned empty insight text.");
   }
 
-  return { text, model: SONNET_MODEL };
+  return { text: withDisclaimer(text), model: SONNET_MODEL };
+}
+
+export async function runDailyInsight(payload: {
+  log: {
+    severity: number;
+    duration_minutes: number | null;
+    triggers: string[];
+    notes: string | null;
+  };
+}): Promise<{ text: string; model: string }> {
+  const client = new Anthropic({ apiKey: requireApiKey() });
+
+  const response = await client.messages.create({
+    model: HAIKU_MODEL,
+    max_tokens: 500,
+    temperature: 0.4,
+    system: `You write a short daily note for Stasus after someone logs vestibular-related symptoms.
+Voice: warm, plainspoken, human — a supportive wellness companion, not a clinician chart.
+Hard rules:
+- Never diagnose, confirm conditions, or suggest medications/treatment plans.
+- Ground the note in what they logged (severity, duration, triggers, notes).
+- Include 2–4 gentle, practical suggestions that might ease or slightly improve how things feel today (pace, rest, reduce a trigger if safe, try in-app calm tools or mapped exercises at a comfortable intensity). Frame as optional ideas, not orders.
+- If severity is high, prioritize rest and caution; remind them emergency cues exist in the app without diagnosing.
+- Keep under 140 words. Flowing paragraphs. No emojis. No model/meta commentary.
+- Do not write a medical disclaimer footer; the app adds one separately.`,
+    messages: [
+      {
+        role: "user",
+        content: `Write the daily note and suggestions for this log:
+${JSON.stringify(payload.log)}`,
+      },
+    ],
+  });
+
+  const text = response.content
+    .filter((block) => block.type === "text")
+    .map((block) => block.text)
+    .join("\n")
+    .trim();
+
+  if (!text) {
+    throw new Error("Daily insight returned empty text.");
+  }
+
+  return { text: withDisclaimer(text), model: HAIKU_MODEL };
+}
+
+export async function runMonthlyInsight(payload: {
+  monthStart: string;
+  logs: unknown[];
+}): Promise<{ text: string; model: string }> {
+  const client = new Anthropic({ apiKey: requireApiKey() });
+
+  const response = await client.messages.create({
+    model: SONNET_MODEL,
+    max_tokens: 800,
+    temperature: 0.4,
+    system: `You write a short monthly letter for Stasus, a vestibular wellness app.
+Voice: warm, plainspoken, human — reflective, not analytical jargon.
+Hard rules:
+- Never diagnose, confirm conditions, or suggest medications/treatment plans.
+- Pattern-level over the month only. Gentle suggestions welcome.
+- Calm and non-punitive. Sparse months are fine — keep it short.
+- Do not write a medical disclaimer footer; the app adds one separately.
+- Keep under 200 words. No emojis. No model/meta commentary.`,
+    messages: [
+      {
+        role: "user",
+        content: `Write the monthly note for the month starting ${payload.monthStart}.
+Symptom logs JSON (background only):
+${JSON.stringify(payload.logs).slice(0, 14000)}`,
+      },
+    ],
+  });
+
+  const text = response.content
+    .filter((block) => block.type === "text")
+    .map((block) => block.text)
+    .join("\n")
+    .trim();
+
+  if (!text) {
+    throw new Error("Monthly insight returned empty text.");
+  }
+
+  return { text: withDisclaimer(text), model: SONNET_MODEL };
 }
 
 export function getAiModels() {

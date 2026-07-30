@@ -6,6 +6,7 @@ export type ProfileRow = {
   condition_label: string | null;
   symptom_patterns: string[];
   suggested_categories: string[];
+  timezone: string;
 };
 
 export async function requireOnboarded() {
@@ -14,7 +15,7 @@ export async function requireOnboarded() {
   const { data: profile } = await insforge.database
     .from("profiles")
     .select(
-      "onboarding_complete, condition_label, symptom_patterns, suggested_categories",
+      "onboarding_complete, condition_label, symptom_patterns, suggested_categories, timezone",
     )
     .eq("id", user.id)
     .maybeSingle();
@@ -32,6 +33,10 @@ export async function requireOnboarded() {
     suggested_categories: Array.isArray(profile.suggested_categories)
       ? (profile.suggested_categories as string[])
       : [],
+    timezone:
+      typeof profile.timezone === "string" && profile.timezone
+        ? profile.timezone
+        : "UTC",
   };
 
   return { insforge, user, profile: normalized };
