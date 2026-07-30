@@ -1,3 +1,4 @@
+import { after } from "next/server";
 import { WELLNESS_REPORT_DISCLAIMER } from "@/lib/ai/disclaimer";
 import { GenerateInsightButton } from "@/components/generate-insight-button";
 import { AppShell } from "@/components/app-shell";
@@ -36,8 +37,10 @@ type InsightRow = {
 export default async function InsightsPage() {
   const { insforge, user, profile } = await requireOnboarded();
 
-  // Best-effort prior-month letter
-  void ensureMonthlyInsight();
+  // Defer so we don't revalidate/update the router while this page is still mounting.
+  after(() => {
+    void ensureMonthlyInsight();
+  });
 
   const tz = normalizeTimeZone(profile.timezone);
 

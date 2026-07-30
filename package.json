@@ -13,6 +13,7 @@
     "test:session-cv-fields": "node --experimental-strip-types scripts/test-session-cv-fields.mjs",
     "test:local-calendar": "node --experimental-strip-types scripts/test-local-calendar.mjs",
     "test:severity-trend": "node --experimental-strip-types scripts/test-severity-trend.mjs",
+    "test:export-csv": "node --experimental-strip-types scripts/test-export-csv.mjs",
     "test:ai-sanitize": "node --experimental-strip-types scripts/test-ai-sanitize.mjs",
     "test:cv": "npm run test:head-yaw && npm run test:balance-presence && npm run test:session-cv-fields && npm run test:phase-b-cv",
     "test:phase-b-cv": "node --experimental-strip-types scripts/test-phase-b-cv.mjs"
@@ -22,6 +23,7 @@
     "@insforge/sdk": "^1.5.1",
     "@mediapipe/tasks-vision": "^1.0.0",
     "next": "16.2.12",
+    "pdf-lib": "^1.17.1",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
