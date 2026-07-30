@@ -4,6 +4,7 @@ import { requireOnboarded } from "@/lib/auth/require-onboarded";
 import { AppShell, CategoryBadge } from "@/components/app-shell";
 import { PracticeCoach } from "@/components/cv/practice-coach";
 import { LogSessionForm } from "@/components/log-session-form";
+import { formatSessionDuration } from "@/lib/sessions/format-duration";
 import {
   CATEGORY_META,
   type Exercise,
@@ -154,7 +155,7 @@ export default async function ExerciseDetailPage({ params }: PageProps) {
                     timeStyle: "short",
                   })}
                   {s.duration_seconds != null
-                    ? ` · ${s.duration_seconds}s`
+                    ? ` · ${formatSessionDuration(s.duration_seconds)}`
                     : ""}
                 </li>
               );

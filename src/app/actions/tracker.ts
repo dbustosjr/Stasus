@@ -8,6 +8,15 @@ import { PRESET_TRIGGERS } from "@/lib/tracker/types";
 import { recordActivityDay } from "@/app/actions/activity";
 import { getAiModels, runDailyInsight } from "@/lib/ai/anthropic";
 import {
+  MAX_CUSTOM_TRIGGER_LENGTH,
+  MAX_DURATION_MINUTES,
+  MAX_SYMPTOM_NOTES_LENGTH,
+  MAX_TRIGGERS_PER_LOG,
+} from "@/lib/ai/limits";
+import { checkAiCallBudget } from "@/lib/ai/rate-limit";
+import { sanitizeUserText } from "@/lib/ai/sanitize";
+import { createInsForgeAdminClient } from "@/lib/insforge/admin";
+import {
   localDateString,
   normalizeTimeZone,
 } from "@/lib/time/local-calendar";
@@ -35,14 +44,25 @@ export async function createSymptomLog(
   let duration_minutes: number | null = null;
   if (durationRaw) {
     duration_minutes = Number.parseInt(durationRaw, 10);
-    if (!Number.isFinite(duration_minutes) || duration_minutes < 0) {
-      return { error: "Duration must be zero or a positive number of minutes." };
+    if (
+      !Number.isFinite(duration_minutes) ||
+      duration_minutes < 0 ||
+      duration_minutes > MAX_DURATION_MINUTES
+    ) {
+      return {
+        error: `Duration must be between 0 and ${MAX_DURATION_MINUTES} minutes.`,
+      };
     }
   }
 
-  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const notesRaw = String(formData.get("notes") ?? "");
+  const notes =
+    sanitizeUserText(notesRaw, MAX_SYMPTOM_NOTES_LENGTH) || null;
   const selected = formData.getAll("triggers").map(String);
-  const customNew = String(formData.get("custom_trigger") ?? "").trim();
+  const customNew = sanitizeUserText(
+    String(formData.get("custom_trigger") ?? ""),
+    MAX_CUSTOM_TRIGGER_LENGTH,
+  );
   const redFlagSignals = formData
     .getAll("red_flag_signals")
     .map(String)
@@ -56,7 +76,11 @@ export async function createSymptomLog(
       continue;
     }
     if (value.startsWith("custom:")) {
-      triggers.push(value.slice("custom:".length));
+      const label = sanitizeUserText(
+        value.slice("custom:".length),
+        MAX_CUSTOM_TRIGGER_LENGTH,
+      );
+      if (label) triggers.push(label);
     }
   }
 
@@ -84,7 +108,7 @@ export async function createSymptomLog(
 
   const uniqueTriggers = [
     ...new Set(triggers.map((t) => t.trim()).filter(Boolean)),
-  ];
+  ].slice(0, MAX_TRIGGERS_PER_LOG);
 
   const { data: inserted, error } = await insforge.database
     .from("symptom_logs")
@@ -120,7 +144,6 @@ export async function createSymptomLog(
       },
     ]);
 
-    // Hard override: never continue into normal tracker/insight flow.
     redirect("/emergency");
   }
 
@@ -132,53 +155,61 @@ export async function createSymptomLog(
 
   if (logId && process.env.ANTHROPIC_API_KEY) {
     try {
-      const { data: profile } = await insforge.database
-        .from("profiles")
-        .select("timezone")
-        .eq("id", user.id)
-        .maybeSingle();
-      const tz = normalizeTimeZone(
-        profile && typeof profile === "object" && "timezone" in profile
-          ? String((profile as { timezone?: string }).timezone)
-          : "UTC",
-      );
-      const periodStart = localDateString(tz);
-      const models = getAiModels();
+      const admin = createInsForgeAdminClient();
+      if (!admin) {
+        // Soft-fail: need admin key to write AI rows after RLS tighten.
+      } else {
+        const budget = await checkAiCallBudget(insforge, user.id, 1);
+        if (budget.ok) {
+          const { data: profile } = await insforge.database
+            .from("profiles")
+            .select("timezone")
+            .eq("id", user.id)
+            .maybeSingle();
+          const tz = normalizeTimeZone(
+            profile && typeof profile === "object" && "timezone" in profile
+              ? String((profile as { timezone?: string }).timezone)
+              : "UTC",
+          );
+          const periodStart = localDateString(tz);
+          const models = getAiModels();
 
-      await insforge.database.from("ai_call_log").insert([
-        {
-          user_id: user.id,
-          purpose: "daily_insight",
-          model_used: models.haiku,
-        },
-      ]);
+          const insight = await runDailyInsight({
+            log: {
+              severity,
+              duration_minutes,
+              triggers: uniqueTriggers,
+              notes,
+            },
+          });
 
-      const insight = await runDailyInsight({
-        log: {
-          severity,
-          duration_minutes,
-          triggers: uniqueTriggers,
-          notes,
-        },
-      });
+          await admin.database.from("ai_call_log").insert([
+            {
+              user_id: user.id,
+              purpose: "daily_insight",
+              model_used: models.haiku,
+            },
+          ]);
 
-      await insforge.database.from("ai_insights").insert([
-        {
-          user_id: user.id,
-          week_start: periodStart,
-          period_start: periodStart,
-          cadence: "daily",
-          source_log_id: logId,
-          insight_text: insight.text,
-          model_used: insight.model,
-          analysis_json: {
-            severity,
-            duration_minutes,
-            triggers: uniqueTriggers,
-          },
-          generated_at: new Date().toISOString(),
-        },
-      ]);
+          await admin.database.from("ai_insights").insert([
+            {
+              user_id: user.id,
+              week_start: periodStart,
+              period_start: periodStart,
+              cadence: "daily",
+              source_log_id: logId,
+              insight_text: insight.text,
+              model_used: insight.model,
+              analysis_json: {
+                severity,
+                duration_minutes,
+                triggers: uniqueTriggers,
+              },
+              generated_at: new Date().toISOString(),
+            },
+          ]);
+        }
+      }
     } catch {
       // Soft-fail: symptom log already saved.
     }

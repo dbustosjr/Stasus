@@ -8,6 +8,8 @@ import {
   runMonthlyInsight,
   runSonnetInsight,
 } from "@/lib/ai/anthropic";
+import { checkAiCallBudget } from "@/lib/ai/rate-limit";
+import { createInsForgeAdminClient } from "@/lib/insforge/admin";
 import {
   localMonthRangeUtcIso,
   localMonthStart,
@@ -41,7 +43,7 @@ async function profileTimezone(
 
 async function upsertCadenceInsight(payload: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  insforge: any;
+  admin: any;
   userId: string;
   cadence: "weekly" | "monthly";
   periodStart: string;
@@ -60,7 +62,7 @@ async function upsertCadenceInsight(payload: {
     generated_at: new Date().toISOString(),
   };
 
-  const { data: existing } = await payload.insforge.database
+  const { data: existing } = await payload.admin.database
     .from("ai_insights")
     .select("id")
     .eq("user_id", payload.userId)
@@ -69,7 +71,7 @@ async function upsertCadenceInsight(payload: {
     .maybeSingle();
 
   if (existing?.id) {
-    const { error } = await payload.insforge.database
+    const { error } = await payload.admin.database
       .from("ai_insights")
       .update({
         insight_text: row.insight_text,
@@ -82,7 +84,7 @@ async function upsertCadenceInsight(payload: {
     return error;
   }
 
-  const { error } = await payload.insforge.database
+  const { error } = await payload.admin.database
     .from("ai_insights")
     .insert([row]);
   return error;
@@ -100,7 +102,21 @@ export async function generateWeeklyInsight(
     };
   }
 
+  const admin = createInsForgeAdminClient();
+  if (!admin) {
+    return {
+      ok: false,
+      error:
+        "INSFORGE_API_KEY is required on the server to store AI notes securely.",
+    };
+  }
+
   const { insforge, user } = await requireUser();
+  const budget = await checkAiCallBudget(insforge, user.id, 2);
+  if (!budget.ok) {
+    return { ok: false, error: budget.error };
+  }
+
   const tz = await profileTimezone(insforge, user.id);
   const weekStart = localWeekStartMonday(tz);
   const { startIso, endIso } = localWeekRangeUtcIso(tz, weekStart);
@@ -119,14 +135,6 @@ export async function generateWeeklyInsight(
     return { ok: false, error: logsError.message };
   }
 
-  await insforge.database.from("ai_call_log").insert([
-    {
-      user_id: user.id,
-      purpose: "weekly_haiku_analysis",
-      model_used: models.haiku,
-    },
-  ]);
-
   let analysis;
   try {
     analysis = await runHaikuAnalysis({
@@ -142,14 +150,6 @@ export async function generateWeeklyInsight(
     };
   }
 
-  await insforge.database.from("ai_call_log").insert([
-    {
-      user_id: user.id,
-      purpose: "weekly_sonnet_insight",
-      model_used: models.sonnet,
-    },
-  ]);
-
   let insight;
   try {
     insight = await runSonnetInsight({ weekStart, analysis });
@@ -160,8 +160,21 @@ export async function generateWeeklyInsight(
     };
   }
 
+  await admin.database.from("ai_call_log").insert([
+    {
+      user_id: user.id,
+      purpose: "weekly_haiku_analysis",
+      model_used: models.haiku,
+    },
+    {
+      user_id: user.id,
+      purpose: "weekly_sonnet_insight",
+      model_used: models.sonnet,
+    },
+  ]);
+
   const upsertError = await upsertCadenceInsight({
-    insforge,
+    admin,
     userId: user.id,
     cadence: "weekly",
     periodStart: weekStart,
@@ -184,10 +197,14 @@ export async function ensureMonthlyInsight(): Promise<InsightActionState> {
     return { ok: false, error: null };
   }
 
+  const admin = createInsForgeAdminClient();
+  if (!admin) {
+    return { ok: false, error: null };
+  }
+
   const { insforge, user } = await requireUser();
   const tz = await profileTimezone(insforge, user.id);
   const monthStart = previousLocalMonthStart(tz);
-  // If we're still in the same month as monthStart somehow, use current month
   const currentMonth = localMonthStart(tz);
   const target =
     monthStart === currentMonth ? previousLocalMonthStart(tz) : monthStart;
@@ -202,6 +219,11 @@ export async function ensureMonthlyInsight(): Promise<InsightActionState> {
 
   if (existing?.id) {
     return { ok: true, error: null };
+  }
+
+  const budget = await checkAiCallBudget(insforge, user.id, 1);
+  if (!budget.ok) {
+    return { ok: false, error: budget.error };
   }
 
   const { startIso, endIso } = localMonthRangeUtcIso(tz, target);
@@ -223,21 +245,23 @@ export async function ensureMonthlyInsight(): Promise<InsightActionState> {
   }
 
   const models = getAiModels();
-  await insforge.database.from("ai_call_log").insert([
-    {
-      user_id: user.id,
-      purpose: "monthly_insight",
-      model_used: models.sonnet,
-    },
-  ]);
 
   try {
     const insight = await runMonthlyInsight({
       monthStart: target,
       logs,
     });
+
+    await admin.database.from("ai_call_log").insert([
+      {
+        user_id: user.id,
+        purpose: "monthly_insight",
+        model_used: models.sonnet,
+      },
+    ]);
+
     const err = await upsertCadenceInsight({
-      insforge,
+      admin,
       userId: user.id,
       cadence: "monthly",
       periodStart: target,

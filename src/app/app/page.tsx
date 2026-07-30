@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireOnboarded } from "@/lib/auth/require-onboarded";
 import { AppShell } from "@/components/app-shell";
+import { DeleteAccountForm } from "@/components/delete-account-form";
 import { CATEGORY_META, type ExerciseCategory } from "@/lib/exercises/types";
 
 export default async function AppHomePage() {
@@ -125,6 +126,7 @@ export default async function AppHomePage() {
             </dd>
           </div>
         </dl>
+        <DeleteAccountForm />
       </section>
     </AppShell>
   );

@@ -3,6 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/require-user";
 import {
+  MAX_SESSION_DURATION_SECONDS,
+  MAX_SESSION_NOTES_LENGTH,
+} from "@/lib/ai/limits";
+import { sanitizeUserText } from "@/lib/ai/sanitize";
+import {
   parseCvConfidenceAvg,
   parseRepCount,
 } from "@/lib/sessions/parse-cv-fields";
@@ -22,12 +27,46 @@ async function insertExerciseSession(
     return { ok: false, error: "Missing exercise." };
   }
 
-  const durationRaw = String(formData.get("duration_seconds") ?? "").trim();
+  // Manual form: minutes + seconds (0–59). Camera coach may still send total seconds only.
+  const minutesRaw = String(formData.get("duration_minutes") ?? "").trim();
+  const secondsRaw = String(formData.get("duration_seconds") ?? "").trim();
   let duration_seconds: number | null = null;
-  if (durationRaw) {
-    duration_seconds = Number.parseInt(durationRaw, 10);
-    if (!Number.isFinite(duration_seconds) || duration_seconds < 0) {
-      return { ok: false, error: "Duration must be zero or more seconds." };
+
+  if (minutesRaw || secondsRaw) {
+    const minutes = minutesRaw ? Number.parseInt(minutesRaw, 10) : 0;
+    const seconds = secondsRaw ? Number.parseInt(secondsRaw, 10) : 0;
+    const hasMinutesField = Boolean(minutesRaw);
+    // Camera path only posts duration_seconds as a total (can be > 59).
+    // Manual path posts duration_minutes and/or duration_seconds (0–59).
+    if (!hasMinutesField && secondsRaw && seconds > 59) {
+      duration_seconds = seconds;
+    } else {
+      if (
+        !Number.isFinite(minutes) ||
+        minutes < 0 ||
+        !Number.isFinite(seconds) ||
+        seconds < 0 ||
+        (hasMinutesField && seconds > 59)
+      ) {
+        return {
+          ok: false,
+          error:
+            "Enter minutes as 0 or more, and seconds from 0–59 (or leave blank).",
+        };
+      }
+      duration_seconds = minutes * 60 + seconds;
+    }
+
+    if (
+      duration_seconds === null ||
+      !Number.isFinite(duration_seconds) ||
+      duration_seconds < 0 ||
+      duration_seconds > MAX_SESSION_DURATION_SECONDS
+    ) {
+      return {
+        ok: false,
+        error: `Duration must be between 0 and ${Math.floor(MAX_SESSION_DURATION_SECONDS / 60)} minutes.`,
+      };
     }
   }
 
@@ -43,7 +82,9 @@ async function insertExerciseSession(
     return { ok: false, error: confidenceParsed.error };
   }
 
-  const notes = String(formData.get("notes") ?? "").trim() || null;
+  const notes =
+    sanitizeUserText(String(formData.get("notes") ?? ""), MAX_SESSION_NOTES_LENGTH) ||
+    null;
 
   const { error } = await insforge.database.from("exercise_sessions").insert([
     {

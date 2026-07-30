@@ -6,9 +6,24 @@ import { WebcamDemo } from "@/components/webcam-demo";
  * Persuade landing — editorial calm, brand-first, motion-safe.
  * Inspired by confident health-tech storytelling; original Stasus voice & tokens.
  */
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ deleted?: string }>;
+}) {
+  const params = await searchParams;
+  const justDeleted = params.deleted === "1";
+
   return (
     <div className="relative flex min-h-full flex-col bg-[var(--stasus-bg)]">
+      {justDeleted ? (
+        <p
+          role="status"
+          className="border-b border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-4 py-3 text-center text-sm text-[var(--stasus-ink-muted)]"
+        >
+          Your account and data were deleted. You’re welcome back anytime.
+        </p>
+      ) : null}
       {/* Full-bleed first viewport */}
       <section className="relative isolate min-h-[min(92vh,52rem)] overflow-hidden">
         <div

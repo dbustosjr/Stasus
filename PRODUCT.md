@@ -8,12 +8,18 @@ Adults 18–65 with vestibular symptoms (PPPD, BPPV, vestibular migraine, undiag
 
 ## v1 product pillars
 
-1. Condition-mapped vestibular rehab exercise library (+ optional webcam practice)
-2. Symptom & trigger tracker
-3. Hypervigilance / anxiety reduction tools
-4. AI notes — daily (after each log), weekly, monthly — Anthropic direct; red-flag escalation
-5. Web/PWA on InsForge Sites, **dark-only**, motion-safe UI
-6. Usage metrics — personal + admin DAU/WAU/MAU from meaningful actions (local timezone)
+1. **Exercise library** — condition-mapped vestibular rehab (habituation, gaze stabilization, balance, canalith education) with optional **webcam practice** (on-device pose CV; session metadata only — no video stored) and manual practice logging (minutes and/or seconds)
+2. **Symptom & trigger tracker** — severity, duration, triggers, notes; interactive severity trend (entry/day windows)
+3. **Calm tools** — hypervigilance / anxiety reduction (grounding, breathing, etc.)
+4. **AI notes** — daily (after each non–red-flag log), weekly, and monthly via **Anthropic direct** (not InsForge Model Gateway); standing medical disclaimer; red-flag escalation to emergency cues
+5. **Web/PWA** — intended host **InsForge Sites** (not Vercel); **dark-only** UI (no light theme / theme toggle); motion-safe
+6. **Usage metrics** — personal activity strip + admin DAU/WAU/MAU (`/app/admin/usage`, allowlisted emails) from meaningful actions in each user’s local timezone
+
+## Account & safety (shipped)
+
+- Email/password auth with **email verification** and **forgot-password** reset (InsForge auth email)
+- **Delete account** from the home dashboard — removes auth user and cascaded app data
+- Server-side AI rate limits, note sanitization, and tightened RLS on `ai_insights` / `ai_call_log` (trusted writes only)
 
 ## Non-goals (v1)
 

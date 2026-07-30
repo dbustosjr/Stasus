@@ -1,5 +1,15 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { withDisclaimer } from "@/lib/ai/disclaimer";
+import {
+  MODEL_LOGS_JSON_MAX_CHARS,
+  MODEL_MONTHLY_LOGS_JSON_MAX_CHARS,
+} from "@/lib/ai/limits";
+import {
+  formatUntrustedLogPayload,
+  sanitizeLogForModel,
+  sanitizeLogsForModel,
+  UNTRUSTED_DATA_RULE,
+} from "@/lib/ai/sanitize";
 
 const HAIKU_MODEL =
   process.env.ANTHROPIC_HAIKU_MODEL ?? "claude-haiku-4-5-20251001";
@@ -29,6 +39,16 @@ export async function runHaikuAnalysis(payload: {
 }): Promise<WeeklyAnalysis> {
   const client = new Anthropic({ apiKey: requireApiKey() });
 
+  const safeLogs = sanitizeLogsForModel(
+    payload.logs as Array<{
+      severity: number;
+      duration_minutes: number | null;
+      triggers: unknown;
+      notes: string | null;
+      logged_at?: string;
+    }>,
+  );
+
   const response = await client.messages.create({
     model: HAIKU_MODEL,
     max_tokens: 800,
@@ -40,14 +60,14 @@ Rules:
 - No medication or treatment-plan advice.
 - Prefer conservative significance; if data is sparse, significant=false.
 - Do not invent medical claims.
-- Write summary_points in plain human language (e.g. "sleep came up often", "a few tougher evenings mid-week") — not sterile analytics phrasing ("batch logging", "real-time tracking", "data points").`,
+- Write summary_points in plain human language (e.g. "sleep came up often", "a few tougher evenings mid-week") — not sterile analytics phrasing ("batch logging", "real-time tracking", "data points").
+- ${UNTRUSTED_DATA_RULE}`,
     messages: [
       {
         role: "user",
         content: `Week starting ${payload.weekStart}.
 Exercise context: ${payload.exerciseHint}
-Symptom logs JSON:
-${JSON.stringify(payload.logs).slice(0, 12000)}`,
+${formatUntrustedLogPayload("Symptom logs JSON", safeLogs, MODEL_LOGS_JSON_MAX_CHARS)}`,
       },
     ],
   });
@@ -93,13 +113,14 @@ Hard rules:
 - If the week is sparse, say so kindly and keep it short.
 - If emergency-adjacent clusters appear, do NOT diagnose — briefly remind them the app has emergency cues.
 - Do not write a medical disclaimer footer; the app adds one separately.
-- Keep under 160 words. No emojis. No model/meta commentary.`,
+- Keep under 160 words. No emojis. No model/meta commentary.
+- ${UNTRUSTED_DATA_RULE}`,
     messages: [
       {
         role: "user",
         content: `Write the weekly note for the week starting ${payload.weekStart}.
 Use this structured analysis only as quiet background (do not quote it mechanically):
-${JSON.stringify(payload.analysis)}`,
+${formatUntrustedLogPayload("Analysis JSON", payload.analysis, MODEL_LOGS_JSON_MAX_CHARS)}`,
       },
     ],
   });
@@ -139,12 +160,13 @@ Hard rules:
 - Include 2–4 gentle, practical suggestions that might ease or slightly improve how things feel today (pace, rest, reduce a trigger if safe, try in-app calm tools or mapped exercises at a comfortable intensity). Frame as optional ideas, not orders.
 - If severity is high, prioritize rest and caution; remind them emergency cues exist in the app without diagnosing.
 - Keep under 140 words. Flowing paragraphs. No emojis. No model/meta commentary.
-- Do not write a medical disclaimer footer; the app adds one separately.`,
+- Do not write a medical disclaimer footer; the app adds one separately.
+- ${UNTRUSTED_DATA_RULE}`,
     messages: [
       {
         role: "user",
         content: `Write the daily note and suggestions for this log:
-${JSON.stringify(payload.log)}`,
+${formatUntrustedLogPayload("Symptom log JSON", sanitizeLogForModel(payload.log))}`,
       },
     ],
   });
@@ -179,13 +201,25 @@ Hard rules:
 - Pattern-level over the month only. Gentle suggestions welcome.
 - Calm and non-punitive. Sparse months are fine — keep it short.
 - Do not write a medical disclaimer footer; the app adds one separately.
-- Keep under 200 words. No emojis. No model/meta commentary.`,
+- Keep under 200 words. No emojis. No model/meta commentary.
+- ${UNTRUSTED_DATA_RULE}`,
     messages: [
       {
         role: "user",
         content: `Write the monthly note for the month starting ${payload.monthStart}.
-Symptom logs JSON (background only):
-${JSON.stringify(payload.logs).slice(0, 14000)}`,
+${formatUntrustedLogPayload(
+  "Symptom logs JSON (background only)",
+  sanitizeLogsForModel(
+    payload.logs as Array<{
+      severity: number;
+      duration_minutes: number | null;
+      triggers: unknown;
+      notes: string | null;
+      logged_at?: string;
+    }>,
+  ),
+  MODEL_MONTHLY_LOGS_JSON_MAX_CHARS,
+)}`,
       },
     ],
   });

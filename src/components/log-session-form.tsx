@@ -27,16 +27,43 @@ export function LogSessionForm({ exerciseId }: { exerciseId: string }) {
         Metadata only — no camera recording is stored. Missed days aren’t
         failures; log when you practice.
       </p>
-      <label className="flex flex-col gap-1.5 text-sm font-medium text-[var(--stasus-ink)]">
-        Duration (seconds, optional)
-        <input
-          name="duration_seconds"
-          type="number"
-          min={0}
-          placeholder="e.g. 120"
-          className="h-11 rounded-xl border border-[var(--stasus-border)] bg-[var(--stasus-mist)] px-4 dark:bg-[var(--stasus-bg)]"
-        />
-      </label>
+      <fieldset className="flex flex-col gap-2">
+        <legend className="text-sm font-medium text-[var(--stasus-ink)]">
+          Duration (optional)
+        </legend>
+        <p className="text-xs text-[var(--stasus-ink-muted)]">
+          Use minutes, seconds, or both — for example 3 minutes, or 2 minutes
+          and 30 seconds.
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-[var(--stasus-ink)]">
+            Minutes
+            <input
+              name="duration_minutes"
+              type="number"
+              min={0}
+              max={180}
+              step={1}
+              inputMode="numeric"
+              placeholder="e.g. 3"
+              className="h-11 rounded-xl border border-[var(--stasus-border)] bg-[var(--stasus-mist)] px-4 dark:bg-[var(--stasus-bg)]"
+            />
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-[var(--stasus-ink)]">
+            Seconds
+            <input
+              name="duration_seconds"
+              type="number"
+              min={0}
+              max={59}
+              step={1}
+              inputMode="numeric"
+              placeholder="e.g. 30"
+              className="h-11 rounded-xl border border-[var(--stasus-border)] bg-[var(--stasus-mist)] px-4 dark:bg-[var(--stasus-bg)]"
+            />
+          </label>
+        </div>
+      </fieldset>
       <label className="flex flex-col gap-1.5 text-sm font-medium text-[var(--stasus-ink)]">
         Notes (optional)
         <textarea
