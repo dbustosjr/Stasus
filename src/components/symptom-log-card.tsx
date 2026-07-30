@@ -38,7 +38,7 @@ export function SymptomLogCard({
               <input type="hidden" name="id" value={log.id} />
               <button
                 type="submit"
-                className="cursor-pointer text-sm text-[var(--stasus-ink-muted)] hover:text-[var(--stasus-ink)]"
+                className="min-h-11 cursor-pointer px-1 text-sm text-[var(--stasus-ink-muted)] hover:text-[var(--stasus-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)]"
               >
                 Restore
               </button>
@@ -48,7 +48,7 @@ export function SymptomLogCard({
               <input type="hidden" name="id" value={log.id} />
               <button
                 type="submit"
-                className="cursor-pointer text-sm text-[var(--stasus-ink-muted)] hover:text-[var(--stasus-ink)]"
+                className="min-h-11 cursor-pointer px-1 text-sm text-[var(--stasus-ink-muted)] hover:text-[var(--stasus-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)]"
               >
                 Archive
               </button>
@@ -58,7 +58,7 @@ export function SymptomLogCard({
             <input type="hidden" name="id" value={log.id} />
             <button
               type="submit"
-              className="cursor-pointer text-sm text-[var(--stasus-ink-muted)] hover:text-red-300"
+              className="min-h-11 cursor-pointer px-1 text-sm text-[var(--stasus-ink-muted)] hover:text-red-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300"
             >
               Delete
             </button>

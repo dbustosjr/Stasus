@@ -5,7 +5,11 @@ export default function EmergencyPage() {
   return (
     <div className="relative flex min-h-full flex-col bg-[var(--stasus-bg)]">
       <SiteHeader />
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 px-6 py-16">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 px-6 py-16 outline-none"
+      >
         <p className="text-sm font-semibold uppercase tracking-wide text-[var(--stasus-ink-muted)]">
           Emergency redirect
         </p>
@@ -33,7 +37,7 @@ export default function EmergencyPage() {
             href="/app/calm"
             className="inline-flex h-12 items-center justify-center rounded-full border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-6 text-base font-semibold text-[var(--stasus-ink)]"
           >
-            After you are safe — Calm tools
+            After you are safe: Calm tools
           </Link>
         </div>
         <p className="text-sm text-[var(--stasus-ink-muted)]">

@@ -19,7 +19,11 @@ export default async function OnboardingPage() {
   return (
     <div className="relative flex min-h-full flex-col bg-[var(--stasus-bg)]">
       <SiteHeader />
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-6 py-12">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-6 py-12 outline-none"
+      >
         <div>
           <p className="text-sm font-medium text-[var(--stasus-ink-muted)]">
             Welcome{user.email ? `, ${user.email}` : ""}

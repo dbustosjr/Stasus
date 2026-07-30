@@ -548,8 +548,8 @@ export function PracticeCoach({
       {phase === "privacy" ? (
         <div className="mt-4 flex flex-col gap-4">
           <p className="text-sm text-[var(--stasus-ink)]">
-            Camera stays on this device. Only timing, optional reps, and
-            tracking confidence are saved — never video.
+            The camera stays on this device. We only save timing, optional reps,
+            and tracking confidence. Never video.
           </p>
           {startError ? (
             <p role="alert" className="text-sm text-red-700 dark:text-red-300">
@@ -642,7 +642,7 @@ export function PracticeCoach({
                 </button>
               ) : null}
               <p className="text-sm text-[var(--stasus-ink-muted)]">
-                This is practice support only — not a diagnosis or form score.
+                This is practice support only. Not a diagnosis or a form score.
               </p>
               <button
                 type="button"

@@ -151,7 +151,7 @@ export function buildTrendPoints(
 
 export function framingForPoints(points: TrendPoint[]): string {
   if (points.length < 2) {
-    return "Log a few entries to see a gentle trend. Trends are informational, not a grade.";
+    return "Log a few entries to see a simple trend. This is just information, not a grade.";
   }
   const earliest = points[0]?.severity;
   const latest = points[points.length - 1]?.severity;
@@ -163,9 +163,9 @@ export function framingForPoints(points: TrendPoint[]): string {
     return "Roughly steady across recent logs.";
   }
   if (delta < 0) {
-    return "Recent logs trend a bit lower than the start of this window.";
+    return "Recent logs look a bit lower than the start of this window.";
   }
-  return "Recent logs trend a bit higher than the start of this window — information only, not failure.";
+  return "Recent logs look a bit higher than the start of this window. That is information, not failure.";
 }
 
 export function formatSeverity(value: number): string {

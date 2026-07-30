@@ -9,13 +9,17 @@ export default function OfflinePage() {
   return (
     <div className="relative flex min-h-full flex-col bg-[var(--stasus-bg)]">
       <SiteHeader />
-      <main className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center gap-4 px-6 py-16">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto flex w-full max-w-lg flex-1 flex-col justify-center gap-4 px-6 py-16 outline-none"
+      >
         <h1 className="text-3xl font-bold tracking-tight text-[var(--stasus-ink)]">
           You’re offline
         </h1>
         <p className="text-[var(--stasus-ink-muted)]">
           Stasus needs a connection to load your private tracker, exercises, and
-          insights. Reconnect, then refresh — we don’t keep health data in an
+          insights. Reconnect, then refresh. We don’t keep health data in an
           offline cache.
         </p>
         <Link

@@ -89,12 +89,11 @@ export function SymptomLogForm({
 
       <fieldset className="flex flex-col gap-2 rounded-2xl border border-[var(--stasus-teal-secondary)] bg-[color-mix(in_srgb,var(--stasus-aqua)_10%,var(--stasus-surface))] px-4 py-4">
         <legend className="px-1 text-sm font-semibold text-[var(--stasus-ink)]">
-          Emergency signal check (required awareness)
+          Emergency check
         </legend>
         <p className="text-xs text-[var(--stasus-ink-muted)]">
-          If sudden severe vertigo occurs with any of the other signs below,
-          saving will redirect you to emergency guidance. This is not a
-          diagnosis.
+          If sudden severe vertigo shows up with any of the signs below, saving
+          will send you to emergency guidance. This is not a diagnosis.
         </p>
         <div className="grid gap-2 sm:grid-cols-2">
           {RED_FLAG_SIGNALS.map((signal) => (
@@ -119,7 +118,7 @@ export function SymptomLogForm({
           name="notes"
           rows={4}
           maxLength={2000}
-          placeholder="What you noticed — keep it factual and kind to yourself."
+          placeholder="What you noticed. Keep it simple and kind to yourself."
           className="rounded-xl border border-[var(--stasus-border)] bg-[var(--stasus-mist)] px-4 py-3 dark:bg-[var(--stasus-surface)]"
         />
       </label>

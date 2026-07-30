@@ -27,7 +27,7 @@ export default async function AppHomePage() {
           Welcome back
         </h1>
         <p className="mt-2 max-w-xl text-[var(--stasus-ink-muted)]">
-          Pick up wherever feels doable today — practice, a quick log, or a
+          Start wherever feels doable: a short practice, a quick log, or a
           calm minute. Nothing here is a scorecard.
         </p>
       </div>
@@ -38,7 +38,7 @@ export default async function AppHomePage() {
             A place to start
           </h2>
           <p className="mt-1 text-sm text-[var(--stasus-ink-muted)]">
-            From what you shared in onboarding — optional, not homework.
+            Based on what you shared when you signed up. Totally optional.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {suggested.map((category) => (
@@ -59,28 +59,28 @@ export default async function AppHomePage() {
           {
             href: "/app/exercises",
             title: "Exercises",
-            body: "Habituation, gaze, balance, and canalith orientation — at your pace.",
+            body: "Gaze, balance, habituation, and BPPV orientation. Go at your own pace.",
           },
           {
             href: "/app/tracker",
             title: "Tracker",
-            body: "Log how things felt, how long, and what may have stirred them.",
+            body: "Note how things felt, how long it lasted, and what might have set it off.",
           },
           {
             href: "/app/calm",
             title: "Calm",
-            body: "Small tools for the checking loop and a steadier breath.",
+            body: "Simple tools for when you catch yourself checking symptoms again.",
           },
           {
             href: "/app/insights",
             title: "Weekly notes",
-            body: "A quiet summary once a week — never after every log.",
+            body: "A short weekly note when you want one, not after every log.",
           },
         ].map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className="group flex cursor-pointer items-baseline justify-between gap-4 py-5 transition-colors hover:text-[var(--stasus-teal-secondary)]"
+            className="group flex min-h-11 cursor-pointer items-baseline justify-between gap-4 rounded-sm py-5 transition-colors hover:text-[var(--stasus-teal-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)]"
           >
             <div>
               <h2 className="font-display text-xl font-medium text-[var(--stasus-ink)] group-hover:text-[var(--stasus-teal-secondary)]">
@@ -111,17 +111,17 @@ export default async function AppHomePage() {
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-[var(--stasus-ink-muted)]">
-              Condition label (optional)
+              What you shared (optional)
             </dt>
             <dd className="font-medium text-[var(--stasus-ink)]">
-              {profile.condition_label || "Not shared"}
+              {profile.condition_label || "Nothing yet"}
             </dd>
           </div>
           <div className="flex justify-between gap-4">
             <dt className="text-[var(--stasus-ink-muted)]">Recent practices</dt>
             <dd className="font-medium text-[var(--stasus-ink)]">
               {recentSessions?.length
-                ? `${recentSessions.length} logged recently`
+                ? `${recentSessions.length} lately`
                 : "None yet"}
             </dd>
           </div>

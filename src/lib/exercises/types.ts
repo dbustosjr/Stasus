@@ -32,22 +32,22 @@ export const CATEGORY_META: Record<
   habituation: {
     label: "Habituation",
     summary:
-      "Gentle, progressive exposure to motion or visual patterns that tend to provoke symptoms.",
+      "Ease into motion or busy visuals that usually stir symptoms, a little at a time.",
   },
   gaze_stabilization: {
     label: "Gaze stabilization",
     summary:
-      "Practice keeping a target clear while your head moves — building steadier vision.",
+      "Keep a target clear while your head moves, so vision feels a bit steadier.",
   },
   balance_training: {
     label: "Balance training",
     summary:
-      "Progressive stance and surface challenges to support postural control.",
+      "Quiet standing and stepping practice with support nearby when you need it.",
   },
   canalith_repositioning: {
     label: "Canalith repositioning",
     summary:
-      "A clinician-guided style of maneuver for BPPV — not a daily exercise routine.",
+      "What BPPV-style repositioning is about. Not a daily exercise routine.",
     isManeuver: true,
   },
 };

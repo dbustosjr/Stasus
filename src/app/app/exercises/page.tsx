@@ -50,16 +50,16 @@ export default async function ExercisesPage() {
           Exercise library
         </h1>
         <p className="mt-2 max-w-2xl text-[var(--stasus-ink-muted)]">
-          Condition-mapped practice cards for habituation, gaze, balance, and
-          canalith orientation — wellness tools, not diagnoses. Pair practice
-          with{" "}
+          Short practices for gaze, balance, habituation, and BPPV orientation.
+          These are wellness tools, not a diagnosis or treatment plan. If things
+          feel louder afterward, try the{" "}
           <Link
             href="/app/calm"
             className="font-semibold text-[var(--stasus-teal)] dark:text-[var(--stasus-aqua)]"
           >
             calm tools
-          </Link>{" "}
-          if hypervigilance rises afterward.
+          </Link>
+          .
         </p>
       </div>
 
@@ -79,7 +79,7 @@ export default async function ExercisesPage() {
                 </h2>
                 {meta.isManeuver ? (
                   <span className="text-xs font-semibold uppercase tracking-wide text-[var(--stasus-ink-muted)]">
-                    Maneuver track · not daily exercise
+                    Orientation · not a daily routine
                   </span>
                 ) : null}
               </div>
@@ -90,9 +90,9 @@ export default async function ExercisesPage() {
 
             {meta.isManeuver ? (
               <div className="rounded-2xl border border-[var(--stasus-teal-secondary)] bg-[color-mix(in_srgb,var(--stasus-aqua)_14%,var(--stasus-surface))] px-5 py-4 text-sm text-[var(--stasus-ink)]">
-                Canalith repositioning is a different intervention type from the
-                other categories. Confirm with a clinician before attempting any
-                maneuver.
+                These cards explain canalith repositioning. They are not
+                step-by-step home maneuvers. Check with a clinician before trying
+                anything in this category.
               </div>
             ) : null}
 

@@ -32,8 +32,8 @@ export default async function CalmPage() {
           Calm tools
         </h1>
         <p className="mt-2 max-w-2xl text-[var(--stasus-ink-muted)]">
-          Psychoeducation and grounding for hypervigilance — linked to your
-          tracker and practice, not a separate content silo.
+          Short reads and grounding for when symptoms and worry feed each other.
+          Meant to sit beside your tracker and practice, not replace your day.
         </p>
       </div>
 
@@ -55,9 +55,9 @@ export default async function CalmPage() {
             After a higher-severity log
           </h2>
           <p className="mt-1 text-sm text-[var(--stasus-ink-muted)]">
-            You logged a severity of 7+ recently. If you are safe, consider one
-            grounding tool below — then a single planned action (rest or a
-            gentle exercise), not repeated checking.
+            You logged a severity of 7+ recently. If you are safe, try one
+            grounding tool below, then one planned next step (rest or a gentle
+            exercise). Skip the repeated checking.
           </p>
           <div className="mt-3 flex flex-wrap gap-3 text-sm font-semibold">
             <a
@@ -83,11 +83,11 @@ export default async function CalmPage() {
       ) : (
         <section className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 py-4">
           <h2 className="text-sm font-semibold text-[var(--stasus-ink)]">
-            Cross-links
+            Alongside the rest of Stasus
           </h2>
           <p className="mt-1 text-sm text-[var(--stasus-ink-muted)]">
-            Use these tools alongside practice and logging — not instead of
-            living your day.
+            Use these when you need them, then get back to your day. They are
+            helpers, not a second full-time job.
           </p>
           <div className="mt-3 flex flex-wrap gap-3 text-sm font-semibold">
             <Link

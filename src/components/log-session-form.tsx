@@ -24,16 +24,16 @@ export function LogSessionForm({ exerciseId }: { exerciseId: string }) {
         Log this practice
       </h2>
       <p className="text-sm text-[var(--stasus-ink-muted)]">
-        Metadata only — no camera recording is stored. Missed days aren’t
-        failures; log when you practice.
+        We only save what you type and how long you practiced. No camera
+        recording is stored. Missed days are not failures; log when you practice.
       </p>
       <fieldset className="flex flex-col gap-2">
         <legend className="text-sm font-medium text-[var(--stasus-ink)]">
           Duration (optional)
         </legend>
         <p className="text-xs text-[var(--stasus-ink-muted)]">
-          Use minutes, seconds, or both — for example 3 minutes, or 2 minutes
-          and 30 seconds.
+          Use minutes, seconds, or both. For example 3 minutes, or 2 minutes and
+          30 seconds.
         </p>
         <div className="grid grid-cols-2 gap-3">
           <label className="flex flex-col gap-1.5 text-sm font-medium text-[var(--stasus-ink)]">
@@ -70,7 +70,7 @@ export function LogSessionForm({ exerciseId }: { exerciseId: string }) {
           name="notes"
           rows={2}
           maxLength={500}
-          placeholder="How it felt — keep it neutral."
+          placeholder="How it felt. Keep it simple."
           className="rounded-xl border border-[var(--stasus-border)] bg-[var(--stasus-mist)] px-4 py-2 dark:bg-[var(--stasus-bg)]"
         />
       </label>

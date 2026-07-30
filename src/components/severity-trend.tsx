@@ -300,8 +300,8 @@ export function SeverityTrend({ logs, timeZone }: Props) {
 
       {points.length < 2 ? (
         <p className="mt-4 text-sm text-[var(--stasus-ink-muted)]">
-          Log a few entries in this window to see a gentle trend. Trends are
-          informational, not a grade.
+          Log a few entries in this window to see a simple trend. This is just
+          information, not a grade.
         </p>
       ) : (
         <>
@@ -318,7 +318,7 @@ export function SeverityTrend({ logs, timeZone }: Props) {
               <svg
                 viewBox={`0 0 ${width} ${height}`}
                 className="h-28 w-full max-w-md"
-                role="img"
+                role="group"
                 aria-labelledby={titleId}
                 onPointerDown={onChartPointerDown}
               >

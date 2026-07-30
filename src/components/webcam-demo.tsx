@@ -40,6 +40,7 @@ export function WebcamDemo() {
         preload="metadata"
         controls={playing}
         poster="/demo/webcam-practice-poster.png"
+        aria-label="Demo of optional webcam practice for head-movement checks"
         onEnded={onEnded}
         onPause={onPause}
         onPlay={() => setPlaying(true)}

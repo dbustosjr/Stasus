@@ -105,3 +105,47 @@ button {
 ::selection {
   background: color-mix(in srgb, var(--stasus-aqua) 45%, transparent);
 }
+
+/* Consistent keyboard focus (WCAG 2.4.7) */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--stasus-aqua);
+  outline-offset: 2px;
+}
+
+.stasus-skip-link {
+  position: absolute;
+  left: 1rem;
+  top: 1rem;
+  z-index: 100;
+  transform: translateY(-200%);
+  border-radius: 9999px;
+  background: var(--stasus-aqua);
+  color: #001219;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.stasus-skip-link:focus,
+.stasus-skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid white;
+  outline-offset: 3px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

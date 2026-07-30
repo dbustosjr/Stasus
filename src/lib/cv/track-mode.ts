@@ -34,15 +34,15 @@ export function resolveCvTrackMode(
 export function cvModeCopy(mode: CvTrackMode): string {
   switch (mode) {
     case "face_gaze_hold":
-      return "Keep your eyes on your target while you turn your head slowly. We’ll count turns where your gaze stays with it.";
+      return "Keep your eyes on your target while you turn your head slowly. We count turns where your gaze stays with it.";
     case "face_near_far":
-      return "Webcam can’t see eye focus directly — stay in frame and tap “Count switch” each time you go near→far (or far→near).";
+      return "The webcam can’t see eye focus directly. Stay in frame and tap “Count switch” each time you go near to far or far to near.";
     case "face_presence":
-      return "Stay gently in view while you do the visual practice. Timer only — no fake rep counting.";
+      return "Stay in view while you do the visual practice. This is a timer only. No fake rep counting.";
     case "pose_balance":
-      return "Stay centered in frame with support nearby. Timer only — hold quality matters more than reps.";
+      return "Stay centered in the frame with support nearby. Timer only. How you hold matters more than reps.";
     case "pose_habituation":
-      return "We’ll count sit-to-stand cycles from your shoulders when you’re in frame. Move slowly.";
+      return "When you’re in frame, we count sit-to-stand cycles from your shoulders. Move slowly.";
   }
 }
 

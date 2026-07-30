@@ -79,7 +79,7 @@ export function LandingSeverityDemo() {
           <svg
             viewBox={`0 0 ${width} ${height}`}
             className="h-28 w-full"
-            role="img"
+            role="group"
             aria-label="Example severity over a recent week"
           >
             {[1, 5, 10].map((sev) => {
@@ -119,7 +119,7 @@ export function LandingSeverityDemo() {
                     cy={y}
                     r={14}
                     fill="transparent"
-                    className="cursor-pointer"
+                    className="cursor-pointer outline-none focus-visible:stroke-[var(--stasus-aqua)] focus-visible:stroke-2"
                     role="button"
                     tabIndex={0}
                     aria-label={`${point.label}: severity ${point.severity}`}

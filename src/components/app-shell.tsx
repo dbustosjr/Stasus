@@ -12,7 +12,7 @@ type AppShellProps = {
 
 export function AppShell({ children, email, active = "home" }: AppShellProps) {
   const linkClass = (key: typeof active) =>
-    `inline-flex min-h-11 shrink-0 items-center rounded-full px-3 py-2 text-sm font-medium transition-colors sm:px-4 ${
+    `inline-flex min-h-11 shrink-0 items-center rounded-full px-3 py-2 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)] sm:px-4 ${
       active === key
         ? "bg-[var(--stasus-teal)] text-white dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
         : "text-[var(--stasus-ink-muted)] hover:bg-[var(--stasus-surface)] hover:text-[var(--stasus-ink)]"
@@ -26,19 +26,39 @@ export function AppShell({ children, email, active = "home" }: AppShellProps) {
           className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden"
           aria-label="App"
         >
-          <Link href="/app" className={linkClass("home")}>
+          <Link
+            href="/app"
+            className={linkClass("home")}
+            aria-current={active === "home" ? "page" : undefined}
+          >
             Home
           </Link>
-          <Link href="/app/exercises" className={linkClass("exercises")}>
+          <Link
+            href="/app/exercises"
+            className={linkClass("exercises")}
+            aria-current={active === "exercises" ? "page" : undefined}
+          >
             Exercises
           </Link>
-          <Link href="/app/tracker" className={linkClass("tracker")}>
+          <Link
+            href="/app/tracker"
+            className={linkClass("tracker")}
+            aria-current={active === "tracker" ? "page" : undefined}
+          >
             Tracker
           </Link>
-          <Link href="/app/calm" className={linkClass("calm")}>
+          <Link
+            href="/app/calm"
+            className={linkClass("calm")}
+            aria-current={active === "calm" ? "page" : undefined}
+          >
             Calm
           </Link>
-          <Link href="/app/insights" className={linkClass("insights")}>
+          <Link
+            href="/app/insights"
+            className={linkClass("insights")}
+            aria-current={active === "insights" ? "page" : undefined}
+          >
             Insights
           </Link>
         </nav>
@@ -58,7 +78,11 @@ export function AppShell({ children, email, active = "home" }: AppShellProps) {
           </form>
         </div>
       </div>
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-5 px-4 py-6 sm:gap-6 sm:px-6 sm:py-8 md:py-10">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-5 px-4 py-6 outline-none sm:gap-6 sm:px-6 sm:py-8 md:py-10"
+      >
         {children}
       </main>
       <TimezoneSync />

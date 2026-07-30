@@ -19,7 +19,7 @@ export function GenerateInsightButton() {
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex h-11 w-fit cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white transition-colors hover:bg-[var(--stasus-teal-secondary)] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[var(--stasus-aqua)] dark:text-[#001219] dark:hover:bg-[#9ec9c6]"
+        className="inline-flex h-11 w-fit cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white transition-colors hover:bg-[var(--stasus-teal-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[var(--stasus-aqua)] dark:text-[#001219] dark:hover:bg-[#9ec9c6]"
       >
         {pending ? "Writing your note…" : "Write this week’s note"}
       </button>

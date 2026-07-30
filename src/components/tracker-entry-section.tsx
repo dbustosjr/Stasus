@@ -44,11 +44,13 @@ export function TrackerEntrySection({
           </span>
         </button>
       </h2>
-      {open ? (
-        <div id={panelId} className="border-t border-[var(--stasus-border)] px-5 py-4">
-          {count === 0 ? empty : <ul className="flex flex-col gap-3">{children}</ul>}
-        </div>
-      ) : null}
+      <div
+        id={panelId}
+        hidden={!open}
+        className="border-t border-[var(--stasus-border)] px-5 py-4"
+      >
+        {count === 0 ? empty : <ul className="flex flex-col gap-3">{children}</ul>}
+      </div>
     </section>
   );
 }

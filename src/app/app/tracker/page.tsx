@@ -48,9 +48,9 @@ export default async function TrackerPage() {
             Symptom tracker
           </h1>
           <p className="mt-2 max-w-2xl text-[var(--stasus-ink-muted)]">
-            Log severity, duration, and triggers at your own pace. Entries are
-            private to your account. After logging, calm tools are available if
-            checking urges rise.
+            Jot severity, how long it lasted, and anything that may have stirred
+            it. Your entries stay private. If you feel the urge to keep checking
+            afterward, the calm tools are right there.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -80,8 +80,8 @@ export default async function TrackerPage() {
       {logs.length === 0 ? (
         <div className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-6 py-10 text-center">
           <p className="text-[var(--stasus-ink-muted)]">
-            No entries yet. When something flares, capture it here neutrally,
-            without judgment.
+            No entries yet. When something flares, you can write it down here
+            without overthinking it.
           </p>
           <Link
             href="/app/tracker/new"
@@ -98,8 +98,8 @@ export default async function TrackerPage() {
             defaultOpen
             empty={
               <p className="text-sm text-[var(--stasus-ink-muted)]">
-                No saved entries. New logs land here, or restore one from
-                Archived.
+                No saved entries right now. New logs show up here, or restore one
+                from Archived.
               </p>
             }
           >

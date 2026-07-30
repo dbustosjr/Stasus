@@ -86,15 +86,14 @@ export default async function ExerciseDetailPage({ params }: PageProps) {
 
       {meta.isManeuver ? (
         <div className="rounded-2xl border border-[var(--stasus-teal-secondary)] bg-[color-mix(in_srgb,var(--stasus-aqua)_14%,var(--stasus-surface))] px-5 py-4 text-sm text-[var(--stasus-ink)]">
-          This belongs to the canalith repositioning track — a different
-          intervention type than daily exercises. Confirm with a clinician
-          before attempting any maneuver.
+          This is canalith orientation, not a daily exercise. Check with a
+          clinician before trying any repositioning maneuver.
         </div>
       ) : null}
 
       {instructions?.duration_hint ? (
         <p className="text-sm font-medium text-[var(--stasus-ink)]">
-          Suggested duration: {instructions.duration_hint}
+          About {instructions.duration_hint}
         </p>
       ) : null}
 

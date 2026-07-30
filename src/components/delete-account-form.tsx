@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import {
   deleteAccount,
   type DeleteAccountState,
@@ -11,13 +11,28 @@ const initial: DeleteAccountState = { error: null };
 export function DeleteAccountForm() {
   const [open, setOpen] = useState(false);
   const [state, action, pending] = useActionState(deleteAccount, initial);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const wasOpen = useRef(false);
+
+  useEffect(() => {
+    if (open) {
+      wasOpen.current = true;
+      panelRef.current?.querySelector<HTMLElement>("input,button")?.focus();
+      return;
+    }
+    if (wasOpen.current) {
+      triggerRef.current?.focus();
+    }
+  }, [open]);
 
   if (!open) {
     return (
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-4 text-sm font-medium text-red-300/90 underline-offset-2 hover:text-red-200 hover:underline"
+        className="mt-4 text-sm font-medium text-red-200 underline-offset-2 hover:text-red-100 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300"
       >
         Delete account
       </button>
@@ -25,8 +40,16 @@ export function DeleteAccountForm() {
   }
 
   return (
-    <div className="mt-4 rounded-2xl border border-red-900/60 bg-red-950/30 px-4 py-4">
-      <h3 className="text-sm font-semibold text-[var(--stasus-ink)]">
+    <div
+      ref={panelRef}
+      className="mt-4 rounded-2xl border border-red-900/60 bg-red-950/30 px-4 py-4"
+      role="region"
+      aria-labelledby="delete-account-heading"
+    >
+      <h3
+        id="delete-account-heading"
+        className="text-sm font-semibold text-[var(--stasus-ink)]"
+      >
         Delete your account
       </h3>
       <p className="mt-2 text-sm leading-relaxed text-[var(--stasus-ink-muted)]">
@@ -54,7 +77,7 @@ export function DeleteAccountForm() {
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-red-500/90 px-5 text-sm font-semibold text-white disabled:opacity-60"
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-red-500/90 px-5 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-200 disabled:opacity-60"
           >
             {pending ? "Deleting…" : "Permanently delete"}
           </button>
@@ -62,7 +85,7 @@ export function DeleteAccountForm() {
             type="button"
             disabled={pending}
             onClick={() => setOpen(false)}
-            className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-medium text-[var(--stasus-ink)]"
+            className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-medium text-[var(--stasus-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)]"
           >
             Cancel
           </button>

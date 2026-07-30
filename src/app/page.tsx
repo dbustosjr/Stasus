@@ -25,8 +25,12 @@ export default async function Home({
           Your account and data were deleted. You’re welcome back anytime.
         </p>
       ) : null}
+      <main id="main-content" tabIndex={-1} className="outline-none">
       {/* Full-bleed first viewport */}
-      <section className="relative isolate min-h-[min(92vh,52rem)] overflow-hidden">
+      <section
+        className="relative isolate min-h-[min(92vh,52rem)] overflow-hidden"
+        aria-labelledby="landing-hero-heading"
+      >
         <div
           aria-hidden
           className="absolute inset-0 bg-[linear-gradient(165deg,#001219_0%,#012833_48%,#014152_100%)]"
@@ -44,13 +48,16 @@ export default async function Home({
 
         <div className="relative z-10 mx-auto flex min-h-[min(78vh,44rem)] w-full max-w-6xl flex-col justify-center px-4 pb-14 pt-6 sm:px-6 sm:pb-20 md:px-10 md:pb-24 md:pt-4">
           <div className="max-w-xl animate-[stasus-rise_0.7s_ease-out_both]">
-            <p className="text-sm font-medium tracking-[0.14em] text-[color-mix(in_srgb,white_72%,transparent)] uppercase">
+            <p className="text-sm font-medium tracking-[0.14em] text-[color-mix(in_srgb,white_80%,transparent)] uppercase">
               Vestibular wellness
             </p>
-            <h1 className="font-display mt-4 text-5xl font-medium leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl">
+            <h1
+              id="landing-hero-heading"
+              className="font-display mt-4 text-5xl font-medium leading-[1.05] tracking-tight text-white sm:text-6xl md:text-7xl"
+            >
               Steadier days.
             </h1>
-            <p className="mt-5 max-w-md text-base leading-relaxed text-[color-mix(in_srgb,white_78%,transparent)] sm:text-lg">
+            <p className="mt-5 max-w-md text-base leading-relaxed text-[color-mix(in_srgb,white_88%,transparent)] sm:text-lg">
               A quiet place to notice what flares, practice mapped rehab, and
               ease the checking loop, without turning your body into a
               diagnosis.
@@ -65,12 +72,12 @@ export default async function Home({
                 </Link>
                 <Link
                   href="/login"
-                  className="inline-flex h-12 w-full cursor-pointer items-center justify-center rounded-full border border-[color-mix(in_srgb,white_45%,transparent)] px-6 text-base font-medium text-white transition-colors hover:border-white hover:bg-[color-mix(in_srgb,white_10%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:w-auto"
+                  className="inline-flex h-12 w-full cursor-pointer items-center justify-center rounded-full border border-[color-mix(in_srgb,white_55%,transparent)] px-6 text-base font-medium text-white transition-colors hover:border-white hover:bg-[color-mix(in_srgb,white_10%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:w-auto"
                 >
                   Sign in
                 </Link>
               </div>
-              <p className="text-center text-sm text-[color-mix(in_srgb,white_55%,transparent)]">
+              <p className="text-center text-sm text-[color-mix(in_srgb,white_75%,transparent)]">
                 Motion-safe by design · works in the browser and on your home
                 screen
               </p>
@@ -208,7 +215,7 @@ export default async function Home({
             <h2 className="font-display text-3xl font-medium tracking-tight sm:text-4xl">
               Ready when you are.
             </h2>
-            <p className="mt-3 text-base text-[color-mix(in_srgb,white_78%,transparent)]">
+            <p className="mt-3 text-base text-[color-mix(in_srgb,white_88%,transparent)]">
               Start with what you’re feeling. You can share a condition label
               later, or never.
             </p>
@@ -233,6 +240,7 @@ export default async function Home({
           </p>
         </div>
       </footer>
+      </main>
     </div>
   );
 }

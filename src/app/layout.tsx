@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { SkipLink } from "@/components/skip-link";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -63,6 +64,7 @@ export default function RootLayout({
       className={`${manrope.variable} ${fraunces.variable} dark h-full`}
     >
       <body className="min-h-full bg-[var(--stasus-bg)] font-sans text-[var(--stasus-ink)] antialiased">
+        <SkipLink />
         {children}
         <ServiceWorkerRegister />
       </body>

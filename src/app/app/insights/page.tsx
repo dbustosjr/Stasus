@@ -78,8 +78,8 @@ export default async function InsightsPage() {
           Insights
         </h1>
         <p className="mt-2 max-w-2xl text-[var(--stasus-ink-muted)]">
-          Daily suggestions after you log, a weekly note, and a monthly
-          letter — wellness support only.
+          Short notes after you log, a weekly summary when you want one, and a
+          monthly letter. Wellness support only, not medical advice.
         </p>
       </div>
 
@@ -89,7 +89,7 @@ export default async function InsightsPage() {
         </h2>
         <p className="mt-1 text-sm text-[var(--stasus-ink-muted)]">
           Days you logged symptoms, practiced, or finished a calm breathing
-          cycle (your local time).
+          cycle, in your local time.
         </p>
         <dl className="mt-4 grid gap-3 sm:grid-cols-3">
           <div>
@@ -136,19 +136,19 @@ export default async function InsightsPage() {
 
       <InsightSection
         title="Daily notes"
-        empty="Log a symptom entry to get a short note with gentle suggestions."
+        empty="Log a symptom entry to get a short note with a few gentle suggestions."
         items={daily}
         cadence="daily"
       />
       <InsightSection
         title="Weekly notes"
-        empty="Nothing for this week yet. Generate above when you have a few logs."
+        empty="Nothing for this week yet. Hit generate above once you have a few logs."
         items={weekly}
         cadence="weekly"
       />
       <InsightSection
         title="Monthly letters"
-        empty="A monthly letter appears after a month with at least one log."
+        empty="A monthly letter shows up after a month with at least one log."
         items={monthly}
         cadence="monthly"
       />

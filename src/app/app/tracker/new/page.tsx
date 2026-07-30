@@ -31,8 +31,9 @@ export default async function NewTrackerEntryPage() {
           New entry
         </h1>
         <p className="mt-2 max-w-xl text-[var(--stasus-ink-muted)]">
-          Capture what you notice. No reactive coaching here — just your
-          record. If checking urges spike afterward, open Calm tools once.
+          Write down what you noticed. There is no coaching on this screen, just
+          your record. If checking urges spike afterward, open Calm once and
+          leave it there.
         </p>
       </div>
 
