@@ -56,13 +56,15 @@ export default async function TrackerPage() {
         <div className="flex flex-wrap gap-2">
           <Link
             href="/app/calm"
-            className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 text-sm font-semibold text-[var(--stasus-ink)]"
+            prefetch
+            className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 text-sm font-semibold text-[var(--stasus-ink)] transition-transform active:scale-[0.98]"
           >
             Calm tools
           </Link>
           <Link
             href="/app/tracker/new"
-            className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
+            prefetch
+            className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white transition-transform active:scale-[0.98] dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
           >
             New entry
           </Link>
@@ -85,7 +87,8 @@ export default async function TrackerPage() {
           </p>
           <Link
             href="/app/tracker/new"
-            className="mt-4 inline-flex text-sm font-semibold text-[var(--stasus-teal)] dark:text-[var(--stasus-aqua)]"
+            prefetch
+            className="mt-4 inline-flex text-sm font-semibold text-[var(--stasus-teal)] transition-transform active:scale-[0.98] dark:text-[var(--stasus-aqua)]"
           >
             Log your first entry
           </Link>

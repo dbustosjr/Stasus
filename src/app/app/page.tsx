@@ -45,7 +45,8 @@ export default async function AppHomePage() {
               <Link
                 key={category}
                 href="/app/exercises"
-                className="cursor-pointer rounded-full bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] px-3 py-1 text-xs font-semibold text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_34%,transparent)]"
+                prefetch
+                className="cursor-pointer rounded-full bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] px-3 py-1 text-xs font-semibold text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_34%,transparent)] active:scale-[0.98]"
               >
                 {CATEGORY_META[category].label}
               </Link>
@@ -80,7 +81,8 @@ export default async function AppHomePage() {
           <Link
             key={item.href}
             href={item.href}
-            className="group flex min-h-11 cursor-pointer items-baseline justify-between gap-4 rounded-sm py-5 transition-colors hover:text-[var(--stasus-teal-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)]"
+            prefetch
+            className="group flex min-h-11 cursor-pointer items-baseline justify-between gap-4 rounded-sm py-5 transition-colors hover:text-[var(--stasus-teal-secondary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)] active:scale-[0.98]"
           >
             <div>
               <h2 className="font-display text-xl font-medium text-[var(--stasus-ink)] group-hover:text-[var(--stasus-teal-secondary)]">
