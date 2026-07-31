@@ -14,6 +14,7 @@
     "test:local-calendar": "node --experimental-strip-types scripts/test-local-calendar.mjs",
     "test:severity-trend": "node --experimental-strip-types scripts/test-severity-trend.mjs",
     "test:export-csv": "node --experimental-strip-types scripts/test-export-csv.mjs",
+    "test:export-client": "node --experimental-strip-types scripts/test-export-client-download.mjs",
     "test:ai-sanitize": "node --experimental-strip-types scripts/test-ai-sanitize.mjs",
     "test:cv": "npm run test:head-yaw && npm run test:balance-presence && npm run test:session-cv-fields && npm run test:phase-b-cv",
     "test:phase-b-cv": "node --experimental-strip-types scripts/test-phase-b-cv.mjs"
