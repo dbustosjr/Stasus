@@ -13,7 +13,7 @@ const SONNET_MODEL =
   Deno.env.get("ANTHROPIC_SONNET_MODEL") ?? "claude-sonnet-4-5";
 
 const DISCLAIMER =
-  "Stasus is a wellness tool. This note is not medical advice, a diagnosis, or a treatment plan. It does not replace care from a qualified clinician. If you’re worried about your symptoms, talk with your doctor or seek urgent care when appropriate.";
+  "Stasus is a wellness tool. This note is not medical advice, a diagnosis, or a treatment plan, and it does not replace care from a clinician. If you are worried about your symptoms, talk with your doctor or get urgent care when you need it.";
 
 type WeeklyAnalysis = {
   patterns: string[];
@@ -44,10 +44,27 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
+function polishInsightProse(text: string): string {
+  let t = text.replace(/\r\n/g, "\n").trim();
+  if (!t) return t;
+  t = t.replace(/\*\*([^*]+)\*\*/g, "$1");
+  t = t.replace(/\*([^*\n]+)\*/g, "$1");
+  t = t.replace(/__([^_\n]+)__/g, "$1");
+  t = t.replace(/^\s{0,3}#{1,6}\s+/gm, "");
+  t = t.replace(/^\s*[-•]\s+/gm, "");
+  t = t.replace(/\*/g, "");
+  t = t.replace(/\s*[—–]\s*/g, ", ");
+  t = t.replace(/\s+,/g, ",");
+  t = t.replace(/,\s*,+/g, ",");
+  t = t.replace(/,\s*\./g, ".");
+  t = t.replace(/\n{3,}/g, "\n\n");
+  return t.trim();
+}
+
 function withDisclaimer(body: string): string {
-  const trimmed = body.trim();
+  const trimmed = polishInsightProse(body);
   if (/not medical advice/i.test(trimmed)) return trimmed;
-  return `${trimmed}\n\n—\n${DISCLAIMER}`;
+  return `${trimmed}\n\n${DISCLAIMER}`;
 }
 
 function pad(n: number) {
@@ -296,12 +313,15 @@ async function runSonnetInsight(payload: {
     max_tokens: 700,
     temperature: 0.4,
     system: `You write a short weekly note for Stasus, a vestibular wellness app.
-Voice: warm, plainspoken, human.
+Voice: warm, plainspoken, professional. Sound like a thoughtful person who read their log, not like an AI report.
 Hard rules:
-- Never diagnose, confirm conditions, or suggest medications/treatment plans.
-- Gentle pattern language. Calm and non-punitive.
+- Never diagnose, confirm conditions, or suggest medications or treatment plans.
+- Second person. Short paragraphs. Gentle pattern language. Calm and non-punitive.
+- Plain text only. No markdown, asterisks, bold, bullet lists, or section headers.
+- Avoid sterile phrases like "data points", "batch logging", "key takeaways".
+- Prefer commas and periods. Em dashes at most once. No emojis. No model commentary.
 - Do not write a medical disclaimer footer; the app adds one separately.
-- Keep under 160 words. No emojis.
+- Keep under 160 words.
 - ${UNTRUSTED_DATA_RULE}`,
     user: `Write the weekly note for the week starting ${payload.weekStart}.
 Use this structured analysis only as quiet background (do not quote it mechanically):

@@ -1,5 +1,9 @@
 import { after } from "next/server";
-import { WELLNESS_REPORT_DISCLAIMER } from "@/lib/ai/disclaimer";
+import {
+  WELLNESS_REPORT_DISCLAIMER,
+  splitInsightDisclaimer,
+} from "@/lib/ai/disclaimer";
+import { polishInsightProse } from "@/lib/ai/polish-insight";
 import { GenerateInsightButton } from "@/components/generate-insight-button";
 import { AppShell } from "@/components/app-shell";
 import { requireOnboarded } from "@/lib/auth/require-onboarded";
@@ -181,6 +185,10 @@ function InsightSection({
         <ul className="flex flex-col divide-y divide-[var(--stasus-border)] border-y border-[var(--stasus-border)]">
           {items.map((item) => {
             const period = item.period_start || item.week_start;
+            const { body, showDisclaimer } = splitInsightDisclaimer(
+              item.insight_text,
+            );
+            const prose = polishInsightProse(body);
             return (
               <li key={item.id} className="py-6">
                 <p className="text-sm text-[var(--stasus-ink-muted)]">
@@ -191,9 +199,9 @@ function InsightSection({
                       : `Week of ${formatPeriodLabel(period, "weekly")}`}
                 </p>
                 <div className="mt-3 max-w-2xl whitespace-pre-wrap text-base leading-relaxed text-[var(--stasus-ink)]">
-                  {item.insight_text}
+                  {prose}
                 </div>
-                {!/not medical advice/i.test(item.insight_text) ? (
+                {showDisclaimer ? (
                   <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--stasus-ink-muted)]">
                     {WELLNESS_REPORT_DISCLAIMER}
                   </p>

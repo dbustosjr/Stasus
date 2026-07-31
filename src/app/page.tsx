@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { WebcamDemo } from "@/components/webcam-demo";
@@ -6,6 +7,27 @@ import { LandingSeverityDemo } from "@/components/landing-severity-demo";
 /** Shared landing content measure — logo, hero, and body share this grid. */
 const shell =
   "mx-auto w-full max-w-[75rem] px-6 sm:px-8 md:px-12";
+
+const PRODUCT_SHOTS = [
+  {
+    src: "/landing/product-tracker.png",
+    alt: "Stasus symptom tracker with a recent severity trend and saved entries",
+    caption: "Symptom tracker",
+    detail: "Log severity, duration, and what may have stirred it.",
+  },
+  {
+    src: "/landing/product-exercises.png",
+    alt: "Stasus exercise library showing guided habituation practices",
+    caption: "Exercise map",
+    detail: "Guided practices for gaze, balance, and gentle motion.",
+  },
+  {
+    src: "/landing/product-weekly-letter.png",
+    alt: "Stasus weekly notes written in plain language",
+    caption: "Weekly letter",
+    detail: "A calm look at patterns, not a grade.",
+  },
+] as const;
 
 /**
  * Persuade landing — editorial calm, brand-first, motion-safe.
@@ -62,8 +84,12 @@ export default async function Home({
                 >
                   Steadier days.
                 </h1>
-                <p className="mt-5 max-w-md text-base leading-relaxed text-[color-mix(in_srgb,white_88%,transparent)] sm:text-lg">
-                  A quiet place to notice what flares, practice mapped rehab, and
+                <p className="mt-5 max-w-lg text-base leading-relaxed text-[color-mix(in_srgb,white_88%,transparent)] sm:text-lg">
+                  Browser-based vestibular wellness with guided exercises,
+                  symptom tracking, and weekly pattern insights.
+                </p>
+                <p className="mt-3 max-w-md text-base leading-relaxed text-[color-mix(in_srgb,white_78%,transparent)]">
+                  A quiet place to notice what flares, practice what fits, and
                   ease the checking loop, without turning your body into a
                   diagnosis.
                 </p>
@@ -124,13 +150,52 @@ export default async function Home({
                 See how a calm head-movement check looks in Stasus.
               </h2>
               <p className="mt-4 max-w-xl text-base leading-relaxed text-[var(--stasus-ink-muted)] sm:text-lg">
-                Optional camera support for practice. Metadata only; nothing is
-                recorded. Tap play when you’re ready. Nothing starts on its own.
+                Optional camera support for practice. On your device only;
+                nothing is recorded as video. Tap play when you’re ready.
+                Nothing starts on its own.
               </p>
             </div>
             <div className="mx-auto w-full max-w-[65rem]">
               <WebcamDemo variant="full" />
             </div>
+          </div>
+        </section>
+
+        {/* Product screenshots */}
+        <section className="border-b border-[var(--stasus-border)] bg-[var(--stasus-bg)] py-16 md:py-20">
+          <div className={shell}>
+            <div className="max-w-2xl">
+              <h2 className="font-display text-3xl font-medium leading-tight tracking-tight text-[var(--stasus-ink)] sm:text-4xl">
+                Inside the product
+              </h2>
+              <p className="mt-3 text-base leading-relaxed text-[var(--stasus-ink-muted)] sm:text-lg">
+                Tracking, practice, and a weekly letter, in the same calm space.
+              </p>
+            </div>
+            <ul className="mt-10 grid gap-8 md:grid-cols-3 md:gap-6">
+              {PRODUCT_SHOTS.map((shot) => (
+                <li key={shot.src} className="flex flex-col gap-3">
+                  <div className="overflow-hidden rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] shadow-[0_20px_60px_-40px_rgba(0,0,0,0.65)]">
+                    <Image
+                      src={shot.src}
+                      alt={shot.alt}
+                      width={1200}
+                      height={900}
+                      className="h-auto w-full"
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                    />
+                  </div>
+                  <div>
+                    <p className="text-base font-medium text-[var(--stasus-ink)]">
+                      {shot.caption}
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed text-[var(--stasus-ink-muted)]">
+                      {shot.detail}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
@@ -145,9 +210,10 @@ export default async function Home({
                 Practice with a map, not a guess
               </h2>
               <p className="mt-4 text-base leading-relaxed text-[var(--stasus-ink-muted)] sm:text-lg">
-                Habituation, gaze, balance, and canalith orientation, guided for
-                comfort, with optional camera checks when they help. See the
-                camera demo above for how a calm check looks.
+                Short practices for gaze, balance, getting used to motion a
+                little at a time, and clear education about inner-ear crystal
+                shifts (often called BPPV). Optional camera checks when they
+                help. See the demo above for how a calm check looks.
               </p>
             </header>
 
@@ -175,8 +241,9 @@ export default async function Home({
                     Calm the checking loop
                   </h3>
                   <p className="mt-3 text-base leading-relaxed text-[var(--stasus-ink-muted)]">
-                    Short tools for the fear-avoidance spiral, so attention can
-                    soften without pretending symptoms aren’t real.
+                    Short tools when fear and checking start to spiral, so
+                    attention can soften without pretending symptoms aren’t
+                    real.
                   </p>
                 </div>
                 <div
@@ -200,7 +267,7 @@ export default async function Home({
                     A weekly letter to yourself
                   </h3>
                   <p className="mt-3 text-base leading-relaxed text-[var(--stasus-ink-muted)]">
-                    Pattern-level insights once a week in plain language. No
+                    Pattern-level notes once a week in plain language. No
                     diagnosis, and nothing reactive after every log. Daily and
                     monthly notes are there too when they help.
                   </p>
@@ -235,7 +302,7 @@ export default async function Home({
               </h2>
               <p className="mt-3 text-base text-[color-mix(in_srgb,white_88%,transparent)]">
                 Start with what you’re feeling. You can share a condition label
-                later, or never.
+                later, or never. Creating an account is free.
               </p>
             </div>
             <Link
@@ -247,17 +314,49 @@ export default async function Home({
           </div>
         </section>
 
-        <footer className="border-t border-[var(--stasus-border)] bg-[var(--stasus-bg)] py-10">
-          <div
-            className={`${shell} flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between`}
-          >
+        {/* Trust & safety */}
+        <section className="border-b border-[var(--stasus-border)] bg-[var(--stasus-bg)] py-14 md:py-16">
+          <div className={`${shell} max-w-3xl`}>
+            <h2 className="font-display text-2xl font-medium text-[var(--stasus-ink)]">
+              Trust and safety
+            </h2>
+            <ul className="mt-5 space-y-3 text-sm leading-relaxed text-[var(--stasus-ink-muted)] sm:text-base">
+              <li>
+                Stasus is a wellness tool, not medical advice, a diagnosis, or a
+                treatment plan. It does not replace care from a clinician.
+              </li>
+              <li>
+                If symptoms suddenly worsen with red-flag signs (such as sudden
+                severe vertigo with face droop, arm weakness, speech trouble, or
+                severe headache), seek emergency care. The app includes emergency
+                cues when those signals are marked.
+              </li>
+              <li>
+                Optional camera practice stays on your device. Stasus does not
+                store video. Practice metadata (for example timing and whether
+                tracking looked stable) may be saved with your account so you can
+                review sessions.
+              </li>
+              <li>
+                Your logs and notes are tied to your account. You can export them
+                or delete your account from the app. Contact the Stasus team if
+                you need help.
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <footer className="bg-[var(--stasus-bg)] py-10">
+          <div className={`${shell} flex flex-wrap items-center gap-x-5 gap-y-2`}>
             <p className="font-display text-lg text-[var(--stasus-ink)]">
               Stasus
             </p>
-            <p className="max-w-md text-sm leading-relaxed text-[var(--stasus-ink-muted)]">
-              Wellness support for vestibular symptoms. Not a clinic, and not a
-              diagnosis engine. Built to stay calm on purpose.
-            </p>
+            <Link
+              href="/overview"
+              className="text-sm font-medium text-[var(--stasus-ink-muted)] underline-offset-4 transition-colors hover:text-[var(--stasus-ink)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)]"
+            >
+              Overview
+            </Link>
           </div>
         </footer>
       </main>

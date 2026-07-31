@@ -16,6 +16,8 @@
     "test:export-csv": "node --experimental-strip-types scripts/test-export-csv.mjs",
     "test:export-client": "node --experimental-strip-types scripts/test-export-client-download.mjs",
     "test:ai-sanitize": "node --experimental-strip-types scripts/test-ai-sanitize.mjs",
+    "test:insight-disclaimer": "node --experimental-strip-types scripts/test-insight-disclaimer.mjs",
+    "test:polish-insight": "node --experimental-strip-types scripts/test-polish-insight.mjs",
     "test:cv": "npm run test:head-yaw && npm run test:balance-presence && npm run test:session-cv-fields && npm run test:phase-b-cv",
     "test:phase-b-cv": "node --experimental-strip-types scripts/test-phase-b-cv.mjs"
   },

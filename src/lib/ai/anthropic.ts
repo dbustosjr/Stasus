@@ -4,12 +4,18 @@ import {
   MODEL_LOGS_JSON_MAX_CHARS,
   MODEL_MONTHLY_LOGS_JSON_MAX_CHARS,
 } from "@/lib/ai/limits";
+import { polishInsightProse } from "@/lib/ai/polish-insight";
 import {
   formatUntrustedLogPayload,
   sanitizeLogForModel,
   sanitizeLogsForModel,
   UNTRUSTED_DATA_RULE,
 } from "@/lib/ai/sanitize";
+import { STASUS_NOTE_VOICE } from "@/lib/ai/voice";
+
+function finalizeInsightText(raw: string): string {
+  return withDisclaimer(polishInsightProse(raw));
+}
 
 const HAIKU_MODEL =
   process.env.ANTHROPIC_HAIKU_MODEL ?? "claude-haiku-4-5-20251001";
@@ -104,16 +110,12 @@ export async function runSonnetInsight(payload: {
     max_tokens: 700,
     temperature: 0.4,
     system: `You write a short weekly note for Stasus, a vestibular wellness app.
-Voice: warm, plainspoken, human — like a thoughtful clinician friend, not a dashboard or analyst report.
-Hard rules:
-- Never diagnose, confirm conditions, or suggest medications/treatment plans.
-- Talk about patterns gently ("a few days clustered…", "sleep showed up often…") — avoid sterile phrases like "batch logging", "real-time tracking", "data points", "entries in quick succession", or "significance".
-- Do not invent section headers like "What showed up:" unless the user would naturally write that way; prefer flowing paragraphs.
-- Calm and non-punitive. Missed days are fine.
-- If the week is sparse, say so kindly and keep it short.
-- If emergency-adjacent clusters appear, do NOT diagnose — briefly remind them the app has emergency cues.
-- Do not write a medical disclaimer footer; the app adds one separately.
-- Keep under 160 words. No emojis. No model/meta commentary.
+${STASUS_NOTE_VOICE}
+Cadence rules:
+- Talk about the week gently ("a few tougher evenings", "sleep showed up often").
+- Calm and non-punitive. Missed days are fine. If the week is sparse, say so kindly and keep it short.
+- If emergency-adjacent clusters appear, do NOT diagnose. Briefly remind them the app has emergency cues.
+- Keep under 160 words.
 - ${UNTRUSTED_DATA_RULE}`,
     messages: [
       {
@@ -135,7 +137,7 @@ ${formatUntrustedLogPayload("Analysis JSON", payload.analysis, MODEL_LOGS_JSON_M
     throw new Error("Sonnet returned empty insight text.");
   }
 
-  return { text: withDisclaimer(text), model: SONNET_MODEL };
+  return { text: finalizeInsightText(text), model: SONNET_MODEL };
 }
 
 export async function runDailyInsight(payload: {
@@ -149,23 +151,22 @@ export async function runDailyInsight(payload: {
   const client = new Anthropic({ apiKey: requireApiKey() });
 
   const response = await client.messages.create({
-    model: HAIKU_MODEL,
-    max_tokens: 500,
-    temperature: 0.4,
-    system: `You write a short daily note for Stasus after someone logs vestibular-related symptoms.
-Voice: warm, plainspoken, human — a supportive wellness companion, not a clinician chart.
-Hard rules:
-- Never diagnose, confirm conditions, or suggest medications/treatment plans.
-- Ground the note in what they logged (severity, duration, triggers, notes).
-- Include 2–4 gentle, practical suggestions that might ease or slightly improve how things feel today (pace, rest, reduce a trigger if safe, try in-app calm tools or mapped exercises at a comfortable intensity). Frame as optional ideas, not orders.
-- If severity is high, prioritize rest and caution; remind them emergency cues exist in the app without diagnosing.
-- Keep under 140 words. Flowing paragraphs. No emojis. No model/meta commentary.
-- Do not write a medical disclaimer footer; the app adds one separately.
+    model: SONNET_MODEL,
+    max_tokens: 450,
+    temperature: 0.55,
+    system: `You write a short daily note for Stasus after someone logs how they feel.
+${STASUS_NOTE_VOICE}
+Cadence rules:
+- Sound like a sincere note left for one person, not a generated report.
+- Reflect what they logged in ordinary words (how strong it felt, how long, what showed up). Do not recite the JSON fields.
+- If you offer ideas, tuck one or two into the last paragraph as invitations, not instructions. Examples of tone: "If it feels doable later, a slower evening might help." Not: "Consider prioritizing rest and hydration."
+- If severity is high, keep it brief and cautious. You may mention emergency cues in the app without diagnosing.
+- Aim for about 80 to 120 words. Never use asterisks anywhere.
 - ${UNTRUSTED_DATA_RULE}`,
     messages: [
       {
         role: "user",
-        content: `Write the daily note and suggestions for this log:
+        content: `Leave a short daily note for this person based on their log. Plain paragraphs only. No markdown.
 ${formatUntrustedLogPayload("Symptom log JSON", sanitizeLogForModel(payload.log))}`,
       },
     ],
@@ -181,7 +182,7 @@ ${formatUntrustedLogPayload("Symptom log JSON", sanitizeLogForModel(payload.log)
     throw new Error("Daily insight returned empty text.");
   }
 
-  return { text: withDisclaimer(text), model: HAIKU_MODEL };
+  return { text: finalizeInsightText(text), model: SONNET_MODEL };
 }
 
 export async function runMonthlyInsight(payload: {
@@ -195,13 +196,11 @@ export async function runMonthlyInsight(payload: {
     max_tokens: 800,
     temperature: 0.4,
     system: `You write a short monthly letter for Stasus, a vestibular wellness app.
-Voice: warm, plainspoken, human — reflective, not analytical jargon.
-Hard rules:
-- Never diagnose, confirm conditions, or suggest medications/treatment plans.
-- Pattern-level over the month only. Gentle suggestions welcome.
-- Calm and non-punitive. Sparse months are fine — keep it short.
-- Do not write a medical disclaimer footer; the app adds one separately.
-- Keep under 200 words. No emojis. No model/meta commentary.
+${STASUS_NOTE_VOICE}
+Cadence rules:
+- Pattern-level over the month only. Gentle optional ideas welcome in prose.
+- Calm and non-punitive. Sparse months are fine; keep those short.
+- Keep under 200 words.
 - ${UNTRUSTED_DATA_RULE}`,
     messages: [
       {
@@ -234,7 +233,7 @@ ${formatUntrustedLogPayload(
     throw new Error("Monthly insight returned empty text.");
   }
 
-  return { text: withDisclaimer(text), model: SONNET_MODEL };
+  return { text: finalizeInsightText(text), model: SONNET_MODEL };
 }
 
 export function getAiModels() {
