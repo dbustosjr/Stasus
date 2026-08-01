@@ -10,22 +10,22 @@ const shell =
 
 const PRODUCT_SHOTS = [
   {
-    src: "/landing/product-tracker.png",
-    alt: "Stasus symptom tracker with a recent severity trend and saved entries",
+    src: "/landing/product-tracker-v3.png",
+    alt: "Stasus symptom tracker with recent severity trend on desktop",
     caption: "Symptom tracker",
     detail: "Log severity, duration, and what may have stirred it.",
   },
   {
-    src: "/landing/product-exercises.png",
-    alt: "Stasus exercise library showing guided habituation practices",
+    src: "/landing/product-exercises-v3.png",
+    alt: "Stasus exercise library habituation grid on desktop",
     caption: "Exercise map",
     detail: "Guided practices for gaze, balance, and gentle motion.",
   },
   {
-    src: "/landing/product-weekly-letter.png",
-    alt: "Stasus weekly notes written in plain language",
-    caption: "Weekly letter",
-    detail: "A calm look at patterns, not a grade.",
+    src: "/landing/product-notes-v3.png",
+    alt: "Stasus daily notes written in plain language",
+    caption: "Daily notes",
+    detail: "A calm look at what you logged, in plain language.",
   },
 ] as const;
 
@@ -175,14 +175,14 @@ export default async function Home({
             <ul className="mt-10 grid gap-8 md:grid-cols-3 md:items-start md:gap-6">
               {PRODUCT_SHOTS.map((shot) => (
                 <li key={shot.src} className="flex flex-col gap-3">
-                  {/* Mobile: natural height. md+: shared frame matching the tallest shot. */}
-                  <div className="overflow-hidden rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] shadow-[0_20px_60px_-40px_rgba(0,0,0,0.65)] md:aspect-[4/5]">
+                  {/* Mobile: natural height. md+: equal ~3:2 frames matching the desktop shots. */}
+                  <div className="overflow-hidden rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] shadow-[0_20px_60px_-40px_rgba(0,0,0,0.65)] md:aspect-[3/2]">
                     <Image
                       src={shot.src}
                       alt={shot.alt}
-                      width={1200}
-                      height={1500}
-                      className="h-auto w-full md:h-full md:object-cover md:object-top"
+                      width={1024}
+                      height={689}
+                      className="h-auto w-full md:h-full md:w-full md:object-cover md:object-top"
                       sizes="(max-width: 768px) 100vw, 33vw"
                     />
                   </div>
