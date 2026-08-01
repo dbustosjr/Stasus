@@ -354,8 +354,14 @@ export default async function Home({
                 Optional camera practice stays on your device. Stasus does not
                 store video. Practice metadata (for example timing and whether
                 tracking looked stable) may be saved with your account so you can
-                review sessions. Full privacy policy and terms will be published
-                before broader invites.
+                review sessions. See our{" "}
+                <Link
+                  href="/privacy/health-data"
+                  className="font-medium text-[var(--stasus-ink)] underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)]"
+                >
+                  Consumer Health Data Privacy Policy
+                </Link>
+                . Terms of use will be published before broader invites.
               </li>
               <li>
                 Your logs and notes are tied to your account. You can export them
@@ -376,6 +382,12 @@ export default async function Home({
               className="text-sm font-medium text-[var(--stasus-ink-muted)] underline-offset-4 transition-colors hover:text-[var(--stasus-ink)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)]"
             >
               Overview
+            </Link>
+            <Link
+              href="/privacy/health-data"
+              className="text-sm font-medium text-[var(--stasus-ink-muted)] underline-offset-4 transition-colors hover:text-[var(--stasus-ink)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)]"
+            >
+              Health data privacy
             </Link>
           </div>
         </footer>

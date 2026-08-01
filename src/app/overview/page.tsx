@@ -159,9 +159,16 @@ export default function OverviewPage() {
               Why this shape: longitudinal patterns help a person notice what
               clusters, and they give a clearer signal for product learning than
               isolated entries. Stasus is not a clinical trial platform and does
-              not claim diagnostic or treatment outcomes. Formal privacy policy,
-              terms, and partner data agreements will be published before broader
-              research or clinical collaboration.
+              not claim diagnostic or treatment outcomes. Our{" "}
+              <Link
+                href="/privacy/health-data"
+                className="font-medium text-[var(--stasus-ink)] underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)]"
+              >
+                Consumer Health Data Privacy Policy
+              </Link>{" "}
+              covers how this data is handled. Terms and partner data agreements
+              will be published before broader research or clinical
+              collaboration.
             </p>
           </section>
 
@@ -172,9 +179,15 @@ export default function OverviewPage() {
             <p className="mt-3 text-base leading-relaxed text-[var(--stasus-ink-muted)]">
               Symptom logs, practice sessions, and notes are tied to your
               account. You can export them or delete your account from the app.
-              Camera video is not stored by Stasus. For questions, contact the
-              Stasus team through the product channels you already use to reach
-              us.
+              Camera video is not stored by Stasus. Details are in the{" "}
+              <Link
+                href="/privacy/health-data"
+                className="font-medium text-[var(--stasus-ink)] underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)]"
+              >
+                Consumer Health Data Privacy Policy
+              </Link>
+              . For questions, contact the Stasus team through the product
+              channels you already use to reach us.
             </p>
           </section>
 
