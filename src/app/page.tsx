@@ -116,7 +116,15 @@ export default async function Home({
               </div>
 
               <div className="animate-[stasus-rise_0.7s_ease-out_0.12s_both] md:max-w-xl md:justify-self-end lg:max-w-[38rem]">
-                <WebcamDemo variant="hero" />
+                <WebcamDemo
+                  variant="hero"
+                  aspect="portrait"
+                  src="/demo/symptom-tracker.mp4"
+                  poster="/demo/symptom-tracker-poster.png"
+                  ariaLabel="Demo of the Stasus symptom tracker"
+                  playLabel="See the symptom tracker"
+                  caption="Log flares and see your trend · tap play when you’re ready"
+                />
               </div>
             </div>
           </div>
@@ -213,8 +221,13 @@ export default async function Home({
               <p className="mt-4 text-base leading-relaxed text-[var(--stasus-ink-muted)] sm:text-lg">
                 Short practices for gaze, balance, getting used to motion a
                 little at a time, and clear education about inner-ear crystal
-                shifts (often called BPPV). Optional camera checks when they
-                help. See the demo above for how a calm check looks.
+                shifts (often called BPPV). Optional camera checks are available
+                for some of them. See the demo above for how a calm check looks.
+              </p>
+              <p className="mt-3 text-base leading-relaxed text-[var(--stasus-ink-muted)] sm:text-lg">
+                Go at your own pace. Stop if symptoms spike, you feel unsafe, or
+                anything feels wrong. Stasus does not supervise practice and does
+                not promise that a session will feel comfortable.
               </p>
             </header>
 
@@ -327,6 +340,11 @@ export default async function Home({
                 treatment plan. It does not replace care from a clinician.
               </li>
               <li>
+                During practice, stop if symptoms spike, you feel unsafe, or
+                anything feels wrong. Use calm tools if checking or anxiety rises
+                afterward. Nothing in the library is supervised care.
+              </li>
+              <li>
                 If symptoms suddenly worsen with red-flag signs (such as sudden
                 severe vertigo with face droop, arm weakness, speech trouble, or
                 severe headache), seek emergency care. The app includes emergency
@@ -336,7 +354,8 @@ export default async function Home({
                 Optional camera practice stays on your device. Stasus does not
                 store video. Practice metadata (for example timing and whether
                 tracking looked stable) may be saved with your account so you can
-                review sessions.
+                review sessions. Full privacy policy and terms will be published
+                before broader invites.
               </li>
               <li>
                 Your logs and notes are tied to your account. You can export them

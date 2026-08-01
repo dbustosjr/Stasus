@@ -51,8 +51,9 @@ export default async function ExercisesPage() {
         </h1>
         <p className="mt-2 max-w-2xl text-[var(--stasus-ink-muted)]">
           Short practices for gaze, balance, habituation, and BPPV orientation.
-          These are wellness tools, not a diagnosis or treatment plan. If things
-          feel louder afterward, try the{" "}
+          These are wellness tools, not a diagnosis or treatment plan. Go at your
+          own pace. Stop if symptoms spike or you feel unsafe. If things feel
+          louder afterward, try the{" "}
           <Link
             href="/app/calm"
             className="font-semibold text-[var(--stasus-teal)] dark:text-[var(--stasus-aqua)]"

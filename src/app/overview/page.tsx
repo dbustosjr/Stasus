@@ -27,7 +27,7 @@ export default function OverviewPage() {
           </h1>
           <p className="mt-5 text-lg leading-relaxed text-[var(--stasus-ink-muted)]">
             Stasus is a browser-based vestibular wellness app. You can log what
-            flares, practice guided exercises that fit how you feel, use short
+            flares, practice from a guided library at your own pace, use short
             calm tools when the checking loop gets loud, and read gentle
             pattern notes over time.
           </p>
@@ -83,6 +83,19 @@ export default function OverviewPage() {
 
           <section className="mt-10">
             <h2 className="font-display text-2xl font-medium text-[var(--stasus-ink)]">
+              Practice limits
+            </h2>
+            <p className="mt-3 text-base leading-relaxed text-[var(--stasus-ink-muted)]">
+              Practices are self-paced wellness tools, not supervised care.
+              Stasus does not promise that a session will feel easy or safe for
+              you. Stop if symptoms spike, you feel unsafe, or anything feels
+              wrong. If checking or anxiety rises afterward, use the calm tools.
+              Seek clinical care when you need it.
+            </p>
+          </section>
+
+          <section className="mt-10">
+            <h2 className="font-display text-2xl font-medium text-[var(--stasus-ink)]">
               Why optional camera practice matters
             </h2>
             <p className="mt-3 text-base leading-relaxed text-[var(--stasus-ink-muted)]">
@@ -98,10 +111,57 @@ export default function OverviewPage() {
               What we are learning
             </h2>
             <p className="mt-3 text-base leading-relaxed text-[var(--stasus-ink-muted)]">
-              Early use helps us see whether people can log comfortably,
-              practice without overwhelm, and find the notes useful. We are not
-              claiming clinical outcomes. We measure engagement and whether the
-              product stays calm and usable in real life.
+              Early use helps us see whether people can log without overwhelm,
+              practice at a pace they choose, and find the notes useful. We are
+              not claiming clinical outcomes. We look at engagement and whether
+              the product stays calm and usable in real life.
+            </p>
+          </section>
+
+          <section
+            id="partners"
+            className="mt-12 border-t border-[var(--stasus-border)] pt-10"
+          >
+            <p className="text-sm font-semibold tracking-[0.12em] text-[var(--stasus-ink-muted)] uppercase">
+              Research and clinical partners
+            </p>
+            <h2 className="font-display mt-3 text-2xl font-medium text-[var(--stasus-ink)]">
+              What data Stasus is designed to collect
+            </h2>
+            <p className="mt-3 text-base leading-relaxed text-[var(--stasus-ink-muted)]">
+              Stasus is built around longitudinal self-report and practice
+              metadata, not one-off snapshots. Vestibular symptoms often shift
+              across days and weeks. Patterns in severity, duration, triggers,
+              and practice over time can matter more than any single log.
+            </p>
+            <ul className="mt-4 list-disc space-y-2 pl-5 text-base leading-relaxed text-[var(--stasus-ink-muted)]">
+              <li>
+                Symptom logs: severity, duration, triggers, free-text notes, and
+                timestamps (in the user’s timezone context).
+              </li>
+              <li>
+                Practice sessions: which exercise, when it was completed,
+                duration, and optional on-device tracking metadata such as
+                timing or whether gaze/presence looked stable. No video is
+                stored.
+              </li>
+              <li>
+                Activity markers: days with meaningful use (logging, practice, or
+                calm tools), used for personal activity views and product
+                learning.
+              </li>
+              <li>
+                Generated notes: daily, weekly, and monthly plain-language
+                summaries created from that user’s own logs.
+              </li>
+            </ul>
+            <p className="mt-4 text-base leading-relaxed text-[var(--stasus-ink-muted)]">
+              Why this shape: longitudinal patterns help a person notice what
+              clusters, and they give a clearer signal for product learning than
+              isolated entries. Stasus is not a clinical trial platform and does
+              not claim diagnostic or treatment outcomes. Formal privacy policy,
+              terms, and partner data agreements will be published before broader
+              research or clinical collaboration.
             </p>
           </section>
 
