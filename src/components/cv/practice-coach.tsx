@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
   saveCameraPracticeSession,
@@ -58,6 +59,10 @@ type PracticeCoachProps = {
   exerciseId: string;
   category: ExerciseCategory;
   title: string;
+  /** Full practice page: larger camera, starts at privacy consent. */
+  variant?: "inline" | "page";
+  /** Shown after a page session ends. */
+  backHref?: string;
 };
 
 function formatElapsed(seconds: number): string {
@@ -106,12 +111,15 @@ export function PracticeCoach({
   exerciseId,
   category,
   title,
+  variant = "inline",
+  backHref,
 }: PracticeCoachProps) {
+  const isPage = variant === "page";
   const mode =
     resolveCvTrackMode(category, title) ??
     (category === "balance_training" ? "pose_balance" : "face_presence");
 
-  const [phase, setPhase] = useState<Phase>("collapsed");
+  const [phase, setPhase] = useState<Phase>(isPage ? "privacy" : "collapsed");
   const [status, setStatus] = useState<TrackingStatusKind>("idle");
   const [statusDetail, setStatusDetail] = useState<string | null>(null);
   const [reps, setReps] = useState(0);
@@ -522,23 +530,49 @@ export function PracticeCoach({
             {actionState.error}
           </p>
         ) : null}
-        <button
-          type="button"
-          onClick={() => {
-            setStartError(null);
-            setPhase("privacy");
-          }}
-          className="mt-4 inline-flex h-11 w-fit items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
-        >
-          Practice with camera
-        </button>
+        {isPage ? (
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                setStartError(null);
+                setActionState(initialAction);
+                setPhase("privacy");
+              }}
+              className="inline-flex h-11 w-fit items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
+            >
+              Practice again
+            </button>
+            {backHref ? (
+              <Link
+                href={backHref}
+                className="inline-flex h-11 w-fit items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-semibold text-[var(--stasus-ink)]"
+              >
+                Back to exercise
+              </Link>
+            ) : null}
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setStartError(null);
+              setPhase("privacy");
+            }}
+            className="mt-4 inline-flex h-11 w-fit items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
+          >
+            Practice with camera
+          </button>
+        )}
       </div>
     );
   }
 
   return (
     <div
-      className={`rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 py-5 ${transitionClass}`}
+      className={`rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] ${
+        isPage ? "px-4 py-5 sm:px-6 sm:py-6" : "px-5 py-5"
+      } ${transitionClass}`}
     >
       <h2 className="text-lg font-semibold text-[var(--stasus-ink)]">
         Practice with camera
@@ -566,19 +600,28 @@ export function PracticeCoach({
             >
               {starting ? "Starting…" : "Start"}
             </button>
-            <button
-              type="button"
-              disabled={starting}
-              onClick={() => {
-                setPhase("collapsed");
-                setStatus("idle");
-                setStatusDetail(null);
-                setStartError(null);
-              }}
-              className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-semibold text-[var(--stasus-ink)] disabled:opacity-60"
-            >
-              Not now
-            </button>
+            {isPage && backHref ? (
+              <Link
+                href={backHref}
+                className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-semibold text-[var(--stasus-ink)]"
+              >
+                Not now
+              </Link>
+            ) : (
+              <button
+                type="button"
+                disabled={starting}
+                onClick={() => {
+                  setPhase("collapsed");
+                  setStatus("idle");
+                  setStatusDetail(null);
+                  setStartError(null);
+                }}
+                className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-semibold text-[var(--stasus-ink)] disabled:opacity-60"
+              >
+                Not now
+              </button>
+            )}
           </div>
         </div>
       ) : null}
@@ -592,6 +635,7 @@ export function PracticeCoach({
         >
           <CameraViewport
             videoRef={videoRef}
+            size={isPage ? "stage" : "default"}
             guide={
               phase === "active" ||
               phase === "calibrating" ||

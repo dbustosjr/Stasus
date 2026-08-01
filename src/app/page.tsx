@@ -172,16 +172,17 @@ export default async function Home({
                 Tracking, practice, and a weekly letter, in the same calm space.
               </p>
             </div>
-            <ul className="mt-10 grid gap-8 md:grid-cols-3 md:gap-6">
+            <ul className="mt-10 grid gap-8 md:grid-cols-3 md:items-start md:gap-6">
               {PRODUCT_SHOTS.map((shot) => (
                 <li key={shot.src} className="flex flex-col gap-3">
-                  <div className="overflow-hidden rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] shadow-[0_20px_60px_-40px_rgba(0,0,0,0.65)]">
+                  {/* Mobile: natural height. md+: shared frame matching the tallest shot. */}
+                  <div className="overflow-hidden rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] shadow-[0_20px_60px_-40px_rgba(0,0,0,0.65)] md:aspect-[4/5]">
                     <Image
                       src={shot.src}
                       alt={shot.alt}
                       width={1200}
-                      height={900}
-                      className="h-auto w-full"
+                      height={1500}
+                      className="h-auto w-full md:h-full md:object-cover md:object-top"
                       sizes="(max-width: 768px) 100vw, 33vw"
                     />
                   </div>

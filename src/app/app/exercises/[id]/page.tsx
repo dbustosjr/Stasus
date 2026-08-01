@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireOnboarded } from "@/lib/auth/require-onboarded";
 import { AppShell, CategoryBadge } from "@/components/app-shell";
-import { PracticeCoach } from "@/components/cv/practice-coach";
+import { PracticeCameraEntry } from "@/components/cv/practice-camera-entry";
 import { LogSessionForm } from "@/components/log-session-form";
 import { formatSessionDuration } from "@/lib/sessions/format-duration";
 import {
@@ -126,7 +126,7 @@ export default async function ExerciseDetailPage({ params }: PageProps) {
       ) : null}
 
       {exercise.requires_cv_tracking ? (
-        <PracticeCoach
+        <PracticeCameraEntry
           exerciseId={exercise.id}
           category={exercise.category}
           title={exercise.title}

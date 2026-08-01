@@ -6,6 +6,8 @@ type CameraViewportProps = {
   videoRef: RefObject<HTMLVideoElement | null>;
   /** Framing guide: face-close work vs standing/torso work. */
   guide?: "face" | "torso" | "none";
+  /** `stage` = taller/wider practice page preview for better tracking range. */
+  size?: "default" | "stage";
 };
 
 /**
@@ -14,9 +16,15 @@ type CameraViewportProps = {
 export function CameraViewport({
   videoRef,
   guide = "face",
+  size = "default",
 }: CameraViewportProps) {
+  const frameClass =
+    size === "stage"
+      ? "relative h-[min(72vh,44rem)] w-full overflow-hidden rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-mist)] dark:bg-[var(--stasus-bg)]"
+      : "relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-mist)] dark:bg-[var(--stasus-bg)]";
+
   return (
-    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-mist)] dark:bg-[var(--stasus-bg)]">
+    <div className={frameClass}>
       <video
         ref={videoRef}
         playsInline
