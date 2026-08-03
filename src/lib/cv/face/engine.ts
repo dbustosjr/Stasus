@@ -1,6 +1,6 @@
 import {
   FACE_LANDMARKER_MODEL_URL,
-  MEDIAPIPE_WASM_CDN,
+  MEDIAPIPE_WASM_PATH,
   installTfLiteLogFilter,
 } from "@/lib/cv/mediapipe-assets";
 
@@ -54,16 +54,26 @@ export async function createFaceEngine(): Promise<FaceEngine> {
       "@mediapipe/tasks-vision"
     );
 
-    const wasm = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_CDN);
-    const landmarker = await FaceLandmarker.createFromOptions(wasm, {
+    const wasm = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_PATH);
+    const options = {
       baseOptions: {
         modelAssetPath: FACE_LANDMARKER_MODEL_URL,
+        delegate: "GPU" as const,
       },
-      runningMode: "VIDEO",
+      runningMode: "VIDEO" as const,
       numFaces: 1,
       outputFaceBlendshapes: false,
       outputFacialTransformationMatrixes: false,
-    });
+    };
+    let landmarker;
+    try {
+      landmarker = await FaceLandmarker.createFromOptions(wasm, options);
+    } catch {
+      landmarker = await FaceLandmarker.createFromOptions(wasm, {
+        ...options,
+        baseOptions: { ...options.baseOptions, delegate: "CPU" },
+      });
+    }
 
     return {
       detect(video, timestampMs) {

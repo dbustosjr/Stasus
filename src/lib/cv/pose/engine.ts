@@ -2,7 +2,7 @@ import {
   KEY_LANDMARK_INDICES,
 } from "@/lib/cv/pose/landmarks";
 import {
-  MEDIAPIPE_WASM_CDN,
+  MEDIAPIPE_WASM_PATH,
   POSE_LANDMARKER_MODEL_URL,
   installTfLiteLogFilter,
 } from "@/lib/cv/mediapipe-assets";
@@ -52,14 +52,24 @@ export async function createPoseEngine(): Promise<PoseEngine> {
       "@mediapipe/tasks-vision"
     );
 
-    const wasm = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_CDN);
-    const landmarker = await PoseLandmarker.createFromOptions(wasm, {
+    const wasm = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_PATH);
+    const options = {
       baseOptions: {
         modelAssetPath: POSE_LANDMARKER_MODEL_URL,
+        delegate: "GPU" as const,
       },
-      runningMode: "VIDEO",
+      runningMode: "VIDEO" as const,
       numPoses: 1,
-    });
+    };
+    let landmarker;
+    try {
+      landmarker = await PoseLandmarker.createFromOptions(wasm, options);
+    } catch {
+      landmarker = await PoseLandmarker.createFromOptions(wasm, {
+        ...options,
+        baseOptions: { ...options.baseOptions, delegate: "CPU" },
+      });
+    }
 
     return {
       detect(video, timestampMs) {

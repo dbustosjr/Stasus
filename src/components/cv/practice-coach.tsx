@@ -457,7 +457,7 @@ export function PracticeCoach({
         engine = usesFace(mode)
           ? await createFaceEngine()
           : await createPoseEngine();
-      } catch {
+      } catch (engineErr) {
         if (gen !== startGenRef.current) return;
         stopCameraAndEngine();
         setPracticeMode(null);
@@ -465,8 +465,14 @@ export function PracticeCoach({
         setPhase("privacy");
         setStatus("idle");
         setStatusDetail(null);
+        const detail =
+          engineErr instanceof Error && engineErr.message
+            ? engineErr.message.slice(0, 160)
+            : "";
         setStartError(
-          "Practice feedback could not load on this device. Your camera is fine — use “Start without feedback,” or log the session manually.",
+          detail
+            ? `Practice feedback could not load (${detail}). Your camera is fine — try “Start without feedback,” or log manually.`
+            : "Practice feedback could not load on this device. Your camera is fine — use “Start without feedback,” or log the session manually.",
         );
         return;
       }

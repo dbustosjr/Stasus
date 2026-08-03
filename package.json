@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "mediapipe:copy": "node scripts/copy-mediapipe-assets.mjs",
     "test:red-flag": "node scripts/test-red-flag.mjs",
     "test:head-yaw": "node --experimental-strip-types scripts/test-head-yaw.mjs",
     "test:balance-presence": "node --experimental-strip-types scripts/test-balance-presence.mjs",
