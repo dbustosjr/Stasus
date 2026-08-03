@@ -118,7 +118,6 @@ export default async function Home({
               <div className="animate-[stasus-rise_0.7s_ease-out_0.12s_both] md:max-w-xl md:justify-self-end lg:max-w-[38rem]">
                 <WebcamDemo
                   variant="hero"
-                  aspect="portrait"
                   src="/demo/symptom-tracker.mp4"
                   poster="/demo/symptom-tracker-poster.png"
                   ariaLabel="Demo of the Stasus symptom tracker"
