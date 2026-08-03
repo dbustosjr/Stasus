@@ -1,0 +1,8 @@
+.venv-img
+docs
+*.md
+!README.md
+scripts
+tsconfig.tsbuildinfo
+pnpm-lock.yaml
+pnpm-workspace.yaml
