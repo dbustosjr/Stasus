@@ -191,23 +191,45 @@ export async function createSymptomLog(
             },
           ]);
 
-          await admin.database.from("ai_insights").insert([
-            {
-              user_id: user.id,
-              week_start: periodStart,
-              period_start: periodStart,
-              cadence: "daily",
-              source_log_id: logId,
-              insight_text: insight.text,
-              model_used: insight.model,
-              analysis_json: {
-                severity,
-                duration_minutes,
-                triggers: uniqueTriggers,
-              },
-              generated_at: new Date().toISOString(),
+          // One daily note per local calendar day — replace, don't stack.
+          const { data: existingDaily } = await admin.database
+            .from("ai_insights")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("cadence", "daily")
+            .eq("period_start", periodStart)
+            .order("generated_at", { ascending: false })
+            .limit(1);
+
+          const dailyPayload = {
+            user_id: user.id,
+            week_start: periodStart,
+            period_start: periodStart,
+            cadence: "daily" as const,
+            source_log_id: logId,
+            insight_text: insight.text,
+            model_used: insight.model,
+            analysis_json: {
+              severity,
+              duration_minutes,
+              triggers: uniqueTriggers,
             },
-          ]);
+            generated_at: new Date().toISOString(),
+          };
+
+          const existingId = existingDaily?.[0]
+            ? String((existingDaily[0] as { id: string }).id)
+            : null;
+
+          if (existingId) {
+            await admin.database
+              .from("ai_insights")
+              .update(dailyPayload)
+              .eq("id", existingId)
+              .eq("user_id", user.id);
+          } else {
+            await admin.database.from("ai_insights").insert([dailyPayload]);
+          }
         }
       }
     } catch {

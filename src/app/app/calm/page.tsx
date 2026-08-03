@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { requireOnboarded } from "@/lib/auth/require-onboarded";
-import { AppShell } from "@/components/app-shell";
 import { BreathingGuide } from "@/components/breathing-guide";
 import {
   CALM_SECTIONS,
@@ -26,7 +25,7 @@ export default async function CalmPage() {
   );
 
   return (
-    <AppShell email={user.email} active="calm">
+    <>
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-[var(--stasus-ink)]">
           Calm tools
@@ -196,6 +195,6 @@ export default async function CalmPage() {
         </h2>
         <BreathingGuide />
       </section>
-    </AppShell>
+    </>
   );
 }

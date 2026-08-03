@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/require-user";
 
@@ -9,7 +10,10 @@ export type ProfileRow = {
   timezone: string;
 };
 
-export async function requireOnboarded() {
+/**
+ * Request-scoped onboarded gate. Deduped with `cache()` alongside requireUser.
+ */
+export const requireOnboarded = cache(async () => {
   const { insforge, user } = await requireUser();
 
   const { data: profile } = await insforge.database
@@ -40,4 +44,4 @@ export async function requireOnboarded() {
   };
 
   return { insforge, user, profile: normalized };
-}
+});

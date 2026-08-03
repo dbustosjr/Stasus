@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AppShell } from "@/components/app-shell";
 import { PracticeCoach } from "@/components/cv/practice-coach";
 import { requireOnboarded } from "@/lib/auth/require-onboarded";
 import type { ExerciseCategory } from "@/lib/exercises/types";
@@ -31,7 +30,7 @@ export default async function ExerciseCameraPracticePage({
   const backHref = `/app/exercises/${exerciseId}`;
 
   return (
-    <AppShell email={user.email} active="exercises">
+    <>
       <div>
         <Link
           href={backHref}
@@ -55,6 +54,6 @@ export default async function ExerciseCameraPracticePage({
         variant="page"
         backHref={backHref}
       />
-    </AppShell>
+    </>
   );
 }

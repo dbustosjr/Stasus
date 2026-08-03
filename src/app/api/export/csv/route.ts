@@ -2,8 +2,14 @@ import { buildExportCsv } from "@/lib/export/csv";
 import { fetchExportData } from "@/lib/export/fetch-export-data";
 import { requireExportUser } from "@/lib/export/require-export-user";
 import { exportFilename } from "@/lib/export/types";
+import { assertSameOriginApiRequest } from "@/lib/security/request-guards";
 
 export async function GET() {
+  const origin = await assertSameOriginApiRequest();
+  if (!origin.ok) {
+    return new Response(origin.message, { status: origin.status });
+  }
+
   const auth = await requireExportUser();
   if (!auth) {
     return new Response("Sign in required.", { status: 401 });

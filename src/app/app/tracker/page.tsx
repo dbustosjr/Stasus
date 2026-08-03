@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { requireOnboarded } from "@/lib/auth/require-onboarded";
-import { AppShell } from "@/components/app-shell";
 import { SeverityTrend } from "@/components/severity-trend";
 import { SymptomLogCard } from "@/components/symptom-log-card";
 import { TrackerEntrySection } from "@/components/tracker-entry-section";
@@ -41,7 +40,7 @@ export default async function TrackerPage() {
   const archived = logs.filter((log) => Boolean(log.archived_at));
 
   return (
-    <AppShell email={user.email} active="tracker">
+    <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-[var(--stasus-ink)]">
@@ -127,6 +126,6 @@ export default async function TrackerPage() {
           </TrackerEntrySection>
         </div>
       )}
-    </AppShell>
+    </>
   );
 }

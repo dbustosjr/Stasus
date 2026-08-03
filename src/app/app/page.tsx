@@ -1,27 +1,60 @@
 import Link from "next/link";
 import { requireOnboarded } from "@/lib/auth/require-onboarded";
-import { AppShell } from "@/components/app-shell";
 import { DeleteAccountForm } from "@/components/delete-account-form";
+import { ProtocolPanel } from "@/components/protocol-panel";
+import { ResearchConsentPrompt } from "@/components/research-consent-prompt";
 import { CATEGORY_META, type ExerciseCategory } from "@/lib/exercises/types";
+import type { ProtocolEvent } from "@/lib/protocols/types";
+import {
+  RESEARCH_CONSENT_VERSION,
+  type ResearchConsentRow,
+} from "@/lib/research/consent";
 
 export default async function AppHomePage() {
   const { insforge, user, profile } = await requireOnboarded();
 
-  const { data: recentSessions } = await insforge.database
-    .from("exercise_sessions")
-    .select("id, completed_at, exercise_id")
-    .eq("user_id", user.id)
-    .order("completed_at", { ascending: false })
-    .limit(3);
+  const [{ data: recentSessions }, { data: protocols }, { data: consentRow }] =
+    await Promise.all([
+      insforge.database
+        .from("exercise_sessions")
+        .select("id, completed_at, exercise_id")
+        .eq("user_id", user.id)
+        .order("completed_at", { ascending: false })
+        .limit(3),
+      insforge.database
+        .from("protocol_events")
+        .select(
+          "id, exercise_category, protocol_label, adherence_target_per_week, started_at, ended_at, notes",
+        )
+        .eq("user_id", user.id)
+        .order("started_at", { ascending: false })
+        .limit(12),
+      insforge.database
+        .from("research_consent")
+        .select("id, consent_version, scope, consented_at, revoked_at")
+        .eq("user_id", user.id)
+        .eq("consent_version", RESEARCH_CONSENT_VERSION)
+        .maybeSingle(),
+    ]);
+
+  const protocolRows = (protocols ?? []) as ProtocolEvent[];
+  const activeProtocols = protocolRows.filter((p) => !p.ended_at);
+  const recentEnded = protocolRows.filter((p) => p.ended_at).slice(0, 3);
+
+  const consent = (consentRow as ResearchConsentRow | null) ?? null;
+  const showResearchPrompt = !consent;
 
   const suggested = profile.suggested_categories.filter((c) =>
-    ["habituation", "gaze_stabilization", "balance_training", "canalith_repositioning"].includes(
-      c,
-    ),
+    [
+      "habituation",
+      "gaze_stabilization",
+      "balance_training",
+      "canalith_repositioning",
+    ].includes(c),
   ) as ExerciseCategory[];
 
   return (
-    <AppShell email={user.email} active="home">
+    <>
       <div>
         <h1 className="font-display text-3xl font-medium tracking-tight text-[var(--stasus-ink)] sm:text-4xl">
           Welcome back
@@ -31,6 +64,10 @@ export default async function AppHomePage() {
           calm minute. Nothing here is a scorecard.
         </p>
       </div>
+
+      {showResearchPrompt ? <ResearchConsentPrompt /> : null}
+
+      <ProtocolPanel active={activeProtocols} recentEnded={recentEnded} />
 
       {suggested.length > 0 ? (
         <section className="border-y border-[var(--stasus-border)] py-5">
@@ -55,7 +92,10 @@ export default async function AppHomePage() {
         </section>
       ) : null}
 
-      <nav className="flex flex-col divide-y divide-[var(--stasus-border)] border-y border-[var(--stasus-border)]" aria-label="Shortcuts">
+      <nav
+        className="flex flex-col divide-y divide-[var(--stasus-border)] border-y border-[var(--stasus-border)]"
+        aria-label="Shortcuts"
+      >
         {[
           {
             href: "/app/exercises",
@@ -130,6 +170,6 @@ export default async function AppHomePage() {
         </dl>
         <DeleteAccountForm />
       </section>
-    </AppShell>
+    </>
   );
 }

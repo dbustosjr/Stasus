@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { requireOnboarded } from "@/lib/auth/require-onboarded";
-import { AppShell } from "@/components/app-shell";
 import { SymptomLogForm } from "@/components/symptom-log-form";
 import type { CustomTrigger } from "@/lib/tracker/types";
 
@@ -19,7 +18,7 @@ export default async function NewTrackerEntryPage() {
   }));
 
   return (
-    <AppShell email={user.email} active="tracker">
+    <>
       <div>
         <Link
           href="/app/tracker"
@@ -51,6 +50,6 @@ export default async function NewTrackerEntryPage() {
       <div className="max-w-xl rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-6 py-6">
         <SymptomLogForm customTriggers={customTriggers} />
       </div>
-    </AppShell>
+    </>
   );
 }

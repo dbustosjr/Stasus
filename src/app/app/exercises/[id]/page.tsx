@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireOnboarded } from "@/lib/auth/require-onboarded";
-import { AppShell, CategoryBadge } from "@/components/app-shell";
+import { CategoryBadge } from "@/components/app-shell";
 import { PracticeCameraEntry } from "@/components/cv/practice-camera-entry";
 import { LogSessionForm } from "@/components/log-session-form";
 import { formatSessionDuration } from "@/lib/sessions/format-duration";
@@ -58,7 +58,7 @@ export default async function ExerciseDetailPage({ params }: PageProps) {
     .limit(5);
 
   return (
-    <AppShell email={user.email} active="exercises">
+    <>
       <div>
         <Link
           href="/app/exercises"
@@ -162,6 +162,6 @@ export default async function ExerciseDetailPage({ params }: PageProps) {
           </ul>
         </section>
       ) : null}
-    </AppShell>
+    </>
   );
 }

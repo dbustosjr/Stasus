@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireOnboarded } from "@/lib/auth/require-onboarded";
-import { AppShell, CategoryBadge } from "@/components/app-shell";
+import { CategoryBadge } from "@/components/app-shell";
 import {
   CATEGORY_META,
   EXERCISE_CATEGORIES,
@@ -44,7 +44,7 @@ export default async function ExercisesPage() {
   }));
 
   return (
-    <AppShell email={user.email} active="exercises">
+    <>
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-[var(--stasus-ink)]">
           Exercise library
@@ -127,6 +127,6 @@ export default async function ExercisesPage() {
           </section>
         ))}
       </div>
-    </AppShell>
+    </>
   );
 }

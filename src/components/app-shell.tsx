@@ -1,17 +1,37 @@
+"use client";
+
+import { usePathname } from "next/navigation";
 import { AccountMenu } from "@/components/account-menu";
 import { AppNav } from "@/components/app-nav";
-import { AppTabBar, type AppTabKey } from "@/components/app-tab-bar";
+import { AppTabBar } from "@/components/app-tab-bar";
 import { SiteHeader } from "@/components/site-header";
 import { TimezoneSync } from "@/components/timezone-sync";
+import { appTabFromPathname, isAppChromePath } from "@/lib/nav/app-tab";
 import { CATEGORY_META, type ExerciseCategory } from "@/lib/exercises/types";
 
 type AppShellProps = {
   children: React.ReactNode;
   email?: string | null;
-  active?: AppTabKey;
+  showAdmin?: boolean;
 };
 
-export function AppShell({ children, email, active = "home" }: AppShellProps) {
+/**
+ * Persistent dashboard chrome. Active tab is derived from the URL so the shell
+ * can live in the /app layout and stay mounted across tab navigations.
+ */
+export function AppShell({
+  children,
+  email,
+  showAdmin = false,
+}: AppShellProps) {
+  const pathname = usePathname() || "/app";
+
+  if (!isAppChromePath(pathname)) {
+    return <>{children}</>;
+  }
+
+  const active = appTabFromPathname(pathname);
+
   return (
     <div className="relative flex min-h-full flex-col bg-[var(--stasus-bg)] pb-[env(safe-area-inset-bottom)]">
       <SiteHeader />
@@ -23,7 +43,7 @@ export function AppShell({ children, email, active = "home" }: AppShellProps) {
               {email}
             </span>
           ) : null}
-          <AccountMenu email={email} />
+          <AccountMenu email={email} showAdmin={showAdmin} />
         </div>
       </div>
       <main

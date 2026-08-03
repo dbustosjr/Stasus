@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export type AppTabKey = "home" | "exercises" | "tracker" | "calm" | "insights";
@@ -102,11 +103,18 @@ type AppTabBarProps = {
 };
 
 export function AppTabBar({ active }: AppTabBarProps) {
+  const router = useRouter();
   const [optimistic, setOptimistic] = useState(active);
 
   useEffect(() => {
     setOptimistic(active);
   }, [active]);
+
+  useEffect(() => {
+    for (const tab of TABS) {
+      router.prefetch(tab.href);
+    }
+  }, [router]);
 
   return (
     <nav
@@ -123,7 +131,7 @@ export function AppTabBar({ active }: AppTabBarProps) {
                 prefetch
                 aria-current={isActive ? "page" : undefined}
                 onPointerDown={() => setOptimistic(tab.key)}
-                className={`flex min-h-12 w-full flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-[10px] font-medium leading-tight transition-colors active:scale-[0.98] sm:text-xs ${
+                className={`flex min-h-12 w-full cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-1.5 text-[10px] font-medium leading-tight transition-colors active:scale-[0.98] sm:text-xs ${
                   isActive
                     ? "bg-[var(--stasus-teal)] text-white dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
                     : "text-[var(--stasus-ink-muted)] hover:bg-[var(--stasus-surface)] hover:text-[var(--stasus-ink)]"

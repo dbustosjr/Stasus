@@ -38,6 +38,9 @@ export async function deleteAccount(
   const admin = createInsForgeAdminClient();
   if (admin) {
     const tables: Array<{ table: string; column: string }> = [
+      { table: "outcome_trends", column: "user_id" },
+      { table: "protocol_events", column: "user_id" },
+      { table: "research_consent", column: "user_id" },
       { table: "ai_insights", column: "user_id" },
       { table: "ai_call_log", column: "user_id" },
       { table: "red_flag_events", column: "user_id" },
