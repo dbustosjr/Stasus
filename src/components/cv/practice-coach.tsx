@@ -29,9 +29,12 @@ import {
 } from "@/lib/cv/pose/landmarks";
 import { createSitStandTracker } from "@/lib/cv/pose/sit-stand";
 import {
+  cameraPracticeModeCopy,
   cvModeCopy,
   guideForMode,
   resolveCvTrackMode,
+  supportsFormFeedback,
+  type CameraPracticeMode,
   type CvTrackMode,
 } from "@/lib/cv/track-mode";
 import type { ExerciseCategory } from "@/lib/exercises/types";
@@ -120,6 +123,9 @@ export function PracticeCoach({
     (category === "balance_training" ? "pose_balance" : "face_presence");
 
   const [phase, setPhase] = useState<Phase>(isPage ? "privacy" : "collapsed");
+  const [practiceMode, setPracticeMode] = useState<CameraPracticeMode | null>(
+    null,
+  );
   const [status, setStatus] = useState<TrackingStatusKind>("idle");
   const [statusDetail, setStatusDetail] = useState<string | null>(null);
   const [reps, setReps] = useState(0);
@@ -131,6 +137,7 @@ export function PracticeCoach({
   const [actionState, setActionState] =
     useState<SessionFormState>(initialAction);
   const [calibProgress, setCalibProgress] = useState(0);
+  const formFeedbackAvailable = supportsFormFeedback(mode);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -147,6 +154,8 @@ export function PracticeCoach({
   modeRef.current = mode;
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
+  const practiceModeRef = useRef<CameraPracticeMode | null>(null);
+  practiceModeRef.current = practiceMode;
   const manualRepsRef = useRef(0);
 
   const gazeRef = useRef(createGazeHoldTracker(GAZE_OPTS));
@@ -202,6 +211,9 @@ export function PracticeCoach({
   }
 
   function currentReps(): number {
+    if (practiceModeRef.current === "preview") {
+      return manualRepsRef.current;
+    }
     const m = modeRef.current;
     if (m === "face_gaze_hold") return gazeRef.current.reps;
     if (m === "face_near_far") return manualRepsRef.current;
@@ -211,6 +223,8 @@ export function PracticeCoach({
 
   function tick(now: number) {
     rafRef.current = requestAnimationFrame(tick);
+
+    if (practiceModeRef.current === "preview") return;
 
     const video = videoRef.current;
     const engine = engineRef.current;
@@ -369,12 +383,20 @@ export function PracticeCoach({
     }
   }
 
-  async function startPractice() {
-    const gen = ++startGenRef.current;
+  function resetConsentErrors() {
     setStartError(null);
-    setStarting(true);
     setStatus("idle");
     setStatusDetail(null);
+  }
+
+  async function startPractice(chosen: CameraPracticeMode) {
+    if (chosen === "feedback" && !formFeedbackAvailable) return;
+
+    const gen = ++startGenRef.current;
+    setPracticeMode(chosen);
+    practiceModeRef.current = chosen;
+    resetConsentErrors();
+    setStarting(true);
     setReps(0);
     setElapsed(0);
     setCalibProgress(0);
@@ -385,15 +407,20 @@ export function PracticeCoach({
     gazeRef.current = createGazeHoldTracker(GAZE_OPTS);
     sitStandRef.current = createSitStandTracker(SIT_STAND_OPTS);
 
+    let cameraOpened = false;
+
     try {
       if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error("Camera API is not available in this browser.");
+        throw Object.assign(new Error("Camera API is not available."), {
+          name: "NotSupportedError",
+        });
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "user" },
         audio: false,
       });
+      cameraOpened = true;
 
       if (gen !== startGenRef.current) {
         stream.getTracks().forEach((t) => t.stop());
@@ -415,9 +442,34 @@ export function PracticeCoach({
         return;
       }
 
-      const engine = usesFace(mode)
-        ? await createFaceEngine()
-        : await createPoseEngine();
+      // Preview: camera mirror + timer only. No pose/gaze scoring.
+      if (chosen === "preview") {
+        startedAtRef.current = Date.now();
+        setPhase("active");
+        setStatus("tracking_well");
+        setStatusDetail("Camera on this device only. Count at your own pace.");
+        return;
+      }
+
+      // Feedback path: camera already works; load on-device models separately.
+      let engine: AnyEngine;
+      try {
+        engine = usesFace(mode)
+          ? await createFaceEngine()
+          : await createPoseEngine();
+      } catch {
+        if (gen !== startGenRef.current) return;
+        stopCameraAndEngine();
+        setPracticeMode(null);
+        practiceModeRef.current = null;
+        setPhase("privacy");
+        setStatus("idle");
+        setStatusDetail(null);
+        setStartError(
+          "Practice feedback could not load on this device. Your camera is fine — use “Start without feedback,” or log the session manually.",
+        );
+        return;
+      }
 
       if (gen !== startGenRef.current) {
         engine.close();
@@ -439,17 +491,42 @@ export function PracticeCoach({
         setStatusDetail("Finding you in the frame…");
       }
       rafRef.current = requestAnimationFrame(tick);
-    } catch {
+    } catch (err) {
       if (gen !== startGenRef.current) return;
       stopCameraAndEngine();
-      setStatus("camera_unavailable");
-      setStatusDetail(
-        "Permission denied or no camera found. You can still log practice manually below.",
-      );
-      setStartError(
-        "Camera unavailable. Check permissions, then try again — or use manual log.",
-      );
+      setPracticeMode(null);
+      practiceModeRef.current = null;
       setPhase("privacy");
+
+      const name = err instanceof DOMException || err instanceof Error ? err.name : "";
+      const permissionDenied =
+        name === "NotAllowedError" ||
+        name === "PermissionDeniedError" ||
+        name === "SecurityError";
+
+      if (permissionDenied) {
+        setStatus("camera_unavailable");
+        setStatusDetail(
+          "The browser blocked the camera for this site. Allow camera access in your browser settings for this page, then try again — or log practice manually below.",
+        );
+        setStartError(
+          "Camera permission is blocked in the browser for this site. That setting is in the browser (address bar / site settings), not in the Stasus Account menu.",
+        );
+      } else if (cameraOpened || chosen === "feedback") {
+        setStatus("idle");
+        setStatusDetail(null);
+        setStartError(
+          "Could not finish starting practice feedback. Try “Start without feedback,” or log the session manually.",
+        );
+      } else {
+        setStatus("camera_unavailable");
+        setStatusDetail(
+          "No camera found, or it could not be opened. Try another browser or device, or log practice manually below.",
+        );
+        setStartError(
+          "Could not open a camera on this device. You can still log practice manually below.",
+        );
+      }
     } finally {
       if (gen === startGenRef.current) setStarting(false);
     }
@@ -469,10 +546,16 @@ export function PracticeCoach({
     );
     setElapsed(durationSeconds);
 
+    const isFeedback = practiceModeRef.current === "feedback";
     const confCount = confidenceCountRef.current;
     const confAvg =
-      confCount > 0 ? confidenceSumRef.current / confCount : null;
-    const repCount = countsReps(mode) ? currentReps() : null;
+      isFeedback && confCount > 0
+        ? confidenceSumRef.current / confCount
+        : null;
+    const repCount =
+      practiceModeRef.current === "preview" || countsReps(mode)
+        ? currentReps()
+        : null;
 
     stopCameraAndEngine();
     setPhase("saving");
@@ -489,6 +572,8 @@ export function PracticeCoach({
       const result = await saveCameraPracticeSession(fd);
       setActionState(result);
       setPhase("collapsed");
+      setPracticeMode(null);
+      practiceModeRef.current = null;
       setStatus("idle");
       setStatusDetail(null);
       setElapsed(0);
@@ -508,8 +593,17 @@ export function PracticeCoach({
   const transitionClass = reducedMotion
     ? ""
     : "transition-opacity duration-200";
-  const copy = cvModeCopy(mode);
-  const guide = guideForMode(mode);
+  const copy =
+    practiceMode != null
+      ? cameraPracticeModeCopy(mode, practiceMode)
+      : formFeedbackAvailable
+        ? `${cvModeCopy(mode)} You can choose feedback or a simple camera mirror.`
+        : `${cvModeCopy(mode)} Camera practice here is a mirror and timer only — no form scoring.`;
+  const guide =
+    practiceMode === "preview" ? "none" : guideForMode(mode);
+  const showManualCount =
+    phase === "active" &&
+    (practiceMode === "preview" || mode === "face_near_far");
 
   if (phase === "collapsed") {
     return (
@@ -535,11 +629,12 @@ export function PracticeCoach({
             <button
               type="button"
               onClick={() => {
-                setStartError(null);
                 setActionState(initialAction);
+                setPracticeMode(null);
+                resetConsentErrors();
                 setPhase("privacy");
               }}
-              className="inline-flex h-11 w-fit items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
+              className="inline-flex h-11 w-fit cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white transition-colors hover:opacity-90 active:scale-[0.98] dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
             >
               Practice again
             </button>
@@ -556,10 +651,11 @@ export function PracticeCoach({
           <button
             type="button"
             onClick={() => {
-              setStartError(null);
+              setPracticeMode(null);
+              resetConsentErrors();
               setPhase("privacy");
             }}
-            className="mt-4 inline-flex h-11 w-fit items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
+            className="mt-4 inline-flex h-11 w-fit cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white transition-colors hover:opacity-90 active:scale-[0.98] dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
           >
             Practice with camera
           </button>
@@ -582,28 +678,64 @@ export function PracticeCoach({
       {phase === "privacy" ? (
         <div className="mt-4 flex flex-col gap-4">
           <p className="text-sm text-[var(--stasus-ink)]">
-            The camera stays on this device. We only save timing, optional reps,
-            and tracking confidence. Never video.
+            The camera stays on this device. We never store video. Choose how
+            you want to practice:
           </p>
+          <ul className="list-disc space-y-2 pl-5 text-sm text-[var(--stasus-ink-muted)]">
+            {formFeedbackAvailable ? (
+              <li>
+                <span className="font-medium text-[var(--stasus-ink)]">
+                  With practice feedback
+                </span>{" "}
+                — optional signals for this exercise (for example gaze hold or
+                sit-to-stand cycles). Not a form grade, not medical clearance,
+                and not a guarantee that you are doing the exercise correctly or
+                safely.
+              </li>
+            ) : null}
+            <li>
+              <span className="font-medium text-[var(--stasus-ink)]">
+                Camera without feedback
+              </span>{" "}
+              — see yourself and time the session; count reps yourself if you
+              want. No form or correctness scoring.
+            </li>
+          </ul>
           {startError ? (
             <p role="alert" className="text-sm text-red-700 dark:text-red-300">
               {startError}
             </p>
           ) : null}
-          <TrackingStatus status={status} detail={statusDetail} />
-          <div className="flex flex-wrap gap-3">
+          {status === "camera_unavailable" ? (
+            <TrackingStatus status={status} detail={statusDetail} />
+          ) : null}
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            {formFeedbackAvailable ? (
+              <button
+                type="button"
+                disabled={starting}
+                onClick={() => void startPractice("feedback")}
+                className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white transition-colors hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
+              >
+                {starting && practiceMode === "feedback"
+                  ? "Starting…"
+                  : "Start with feedback"}
+              </button>
+            ) : null}
             <button
               type="button"
               disabled={starting}
-              onClick={() => void startPractice()}
-              className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white disabled:opacity-60 dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
+              onClick={() => void startPractice("preview")}
+              className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full border border-[var(--stasus-border)] bg-[var(--stasus-bg)] px-5 text-sm font-semibold text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_16%,transparent)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {starting ? "Starting…" : "Start"}
+              {starting && practiceMode === "preview"
+                ? "Starting…"
+                : "Start without feedback"}
             </button>
             {isPage && backHref ? (
               <Link
                 href={backHref}
-                className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-semibold text-[var(--stasus-ink)]"
+                className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-semibold text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_16%,transparent)] active:scale-[0.98]"
               >
                 Not now
               </Link>
@@ -613,11 +745,12 @@ export function PracticeCoach({
                 disabled={starting}
                 onClick={() => {
                   setPhase("collapsed");
+                  setPracticeMode(null);
                   setStatus("idle");
                   setStatusDetail(null);
                   setStartError(null);
                 }}
-                className="inline-flex h-11 items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-semibold text-[var(--stasus-ink)] disabled:opacity-60"
+                className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-semibold text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_16%,transparent)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Not now
               </button>
@@ -666,27 +799,34 @@ export function PracticeCoach({
                     />
                   </span>
                 </p>
-                {countsReps(mode) && phase !== "calibrating" ? (
+                {(practiceMode === "preview" || countsReps(mode)) &&
+                phase !== "calibrating" ? (
                   <p>
-                    {repLabel(mode)}:{" "}
-                    <span className="font-medium">{reps}</span>
+                    {practiceMode === "preview"
+                      ? "Your count"
+                      : repLabel(mode)}
+                    : <span className="font-medium">{reps}</span>
                   </p>
                 ) : null}
               </div>
-              {mode === "face_near_far" && phase === "active" ? (
+              {showManualCount ? (
                 <button
                   type="button"
                   onClick={() => {
                     manualRepsRef.current += 1;
                     setReps(manualRepsRef.current);
                   }}
-                  className="inline-flex h-11 w-fit items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-semibold text-[var(--stasus-ink)]"
+                  className="inline-flex h-11 w-fit cursor-pointer items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-semibold text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_16%,transparent)] active:scale-[0.98]"
                 >
-                  Count switch
+                  {mode === "face_near_far" && practiceMode !== "preview"
+                    ? "Count switch"
+                    : "Count"}
                 </button>
               ) : null}
               <p className="text-sm text-[var(--stasus-ink-muted)]">
-                This is practice support only. Not a diagnosis or a form score.
+                {practiceMode === "feedback"
+                  ? "Practice feedback only. Not a diagnosis, form grade, or proof that the exercise is correct or safe for you. Stop if anything feels wrong."
+                  : "Camera mirror and timer only. Not a diagnosis or form score. Stop if anything feels wrong."}
               </p>
               <button
                 type="button"

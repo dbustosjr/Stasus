@@ -2,6 +2,11 @@ import Link from "next/link";
 import { requireOnboarded } from "@/lib/auth/require-onboarded";
 import { BreathingGuide } from "@/components/breathing-guide";
 import {
+  FearAvoidanceGuide,
+  GroundingGuide,
+  SymptomCheckingGuide,
+} from "@/components/calm-guided-practice";
+import {
   CALM_SECTIONS,
   EMERGENCY_CUES,
   FEAR_AVOIDANCE,
@@ -31,8 +36,8 @@ export default async function CalmPage() {
           Calm tools
         </h1>
         <p className="mt-2 max-w-2xl text-[var(--stasus-ink-muted)]">
-          Short reads and grounding for when symptoms and worry feed each other.
-          Meant to sit beside your tracker and practice, not replace your day.
+          Short guided practices for when symptoms and worry feed each other.
+          Wellness helpers only — not therapy or a treatment plan.
         </p>
       </div>
 
@@ -55,8 +60,8 @@ export default async function CalmPage() {
           </h2>
           <p className="mt-1 text-sm text-[var(--stasus-ink-muted)]">
             You logged a severity of 7+ recently. If you are safe, try one
-            grounding tool below, then one planned next step (rest or a gentle
-            exercise). Skip the repeated checking.
+            grounding practice below, then one planned next step (rest or a
+            gentle exercise). Skip the repeated checking.
           </p>
           <div className="mt-3 flex flex-wrap gap-3 text-sm font-semibold">
             <a
@@ -110,7 +115,7 @@ export default async function CalmPage() {
           <a
             key={section.id}
             href={`#${section.id}`}
-            className="rounded-full border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-4 py-2 text-sm font-medium text-[var(--stasus-ink)]"
+            className="cursor-pointer rounded-full border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-4 py-2 text-sm font-medium text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_16%,transparent)]"
           >
             {section.title}
           </a>
@@ -124,22 +129,7 @@ export default async function CalmPage() {
         <p className="max-w-2xl text-[var(--stasus-ink-muted)]">
           {FEAR_AVOIDANCE.intro}
         </p>
-        <ol className="grid gap-3 sm:grid-cols-2">
-          {FEAR_AVOIDANCE.steps.map((step, index) => (
-            <li
-              key={step.label}
-              className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 py-4"
-            >
-              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--stasus-ink-muted)]">
-                {index + 1}. {step.label}
-              </p>
-              <p className="mt-2 text-sm text-[var(--stasus-ink)]">{step.text}</p>
-            </li>
-          ))}
-        </ol>
-        <p className="max-w-2xl text-sm font-medium text-[var(--stasus-ink)]">
-          {FEAR_AVOIDANCE.practice}
-        </p>
+        <FearAvoidanceGuide />
       </section>
 
       <section id="symptom-checking" className="scroll-mt-8 flex flex-col gap-4">
@@ -149,44 +139,17 @@ export default async function CalmPage() {
         <p className="max-w-2xl text-[var(--stasus-ink-muted)]">
           {SYMPTOM_CHECKING.intro}
         </p>
-        <ul className="flex flex-col gap-3">
-          {SYMPTOM_CHECKING.prompts.map((item) => (
-            <li
-              key={item.urge}
-              className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 py-4"
-            >
-              <p className="text-sm font-medium text-[var(--stasus-ink)]">
-                Urge: “{item.urge}”
-              </p>
-              <p className="mt-2 text-sm text-[var(--stasus-ink-muted)]">
-                {item.reframe}
-              </p>
-            </li>
-          ))}
-        </ul>
+        <SymptomCheckingGuide />
       </section>
 
       <section id="grounding" className="scroll-mt-8 flex flex-col gap-4">
         <h2 className="text-2xl font-semibold text-[var(--stasus-ink)]">
           {GROUNDING.title}
         </h2>
-        <div className="grid gap-3 md:grid-cols-2">
-          {GROUNDING.tools.map((tool) => (
-            <article
-              key={tool.name}
-              className="rounded-2xl border border-[var(--stasus-border)] bg-[var(--stasus-surface)] px-5 py-4"
-            >
-              <h3 className="text-lg font-semibold text-[var(--stasus-ink)]">
-                {tool.name}
-              </h3>
-              <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm text-[var(--stasus-ink-muted)]">
-                {tool.steps.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ol>
-            </article>
-          ))}
-        </div>
+        <p className="max-w-2xl text-sm text-[var(--stasus-ink-muted)]">
+          Pick a tool and move through it one step at a time.
+        </p>
+        <GroundingGuide />
       </section>
 
       <section id="breathing" className="scroll-mt-8 flex flex-col gap-4">

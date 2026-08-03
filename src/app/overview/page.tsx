@@ -69,10 +69,14 @@ export default function OverviewPage() {
               </li>
               <li>
                 Optional camera practice on your device for some exercises.
-                Video stays on your device; the app keeps only practice
-                metadata such as timing and whether tracking looked stable.
+                Video stays on your device. You can use a mirror-and-timer mode,
+                or opt in to limited practice feedback where signals are strong
+                enough. Feedback is not a form grade or medical clearance.
               </li>
-              <li>Use calm tools when the urge to keep checking shows up.</li>
+              <li>
+                Use guided calm practices when the urge to keep checking shows
+                up.
+              </li>
               <li>
                 Read daily, weekly, and monthly notes in plain language. Export
                 your logs and practice sessions as CSV or PDF. Delete your
@@ -100,9 +104,11 @@ export default function OverviewPage() {
             </h2>
             <p className="mt-3 text-base leading-relaxed text-[var(--stasus-ink-muted)]">
               Some vestibular practices ask you to move your head while keeping
-              your eyes on a target. A short on-device check can show whether
-              your gaze stayed with that target. Nothing is uploaded as video.
-              The camera does not start until you choose to begin.
+              your eyes on a target. You can practice with a camera mirror only,
+              or opt in to limited on-device feedback for certain exercises.
+              Feedback is practice support, not proof of correct or safe form.
+              Nothing is uploaded as video. The camera does not start until you
+              choose a mode and begin.
             </p>
           </section>
 

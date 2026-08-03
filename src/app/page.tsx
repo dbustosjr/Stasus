@@ -335,25 +335,30 @@ export default async function Home({
             </h2>
             <ul className="mt-5 space-y-3 text-sm leading-relaxed text-[var(--stasus-ink-muted)] sm:text-base">
               <li>
-                Stasus is a wellness tool, not medical advice, a diagnosis, or a
-                treatment plan. It does not replace care from a clinician.
+                Stasus is a general wellness product. It is not medical advice,
+                a diagnosis, a treatment plan, or a substitute for care from a
+                clinician.
               </li>
               <li>
-                During practice, stop if symptoms spike, you feel unsafe, or
-                anything feels wrong. Use calm tools if checking or anxiety rises
-                afterward. Nothing in the library is supervised care.
+                Guided practices and calm tools are self-paced. They are not
+                supervised care. Stop if symptoms spike, you feel unsafe, or
+                anything feels wrong.
               </li>
               <li>
-                If symptoms suddenly worsen with red-flag signs (such as sudden
+                If symptoms suddenly worsen with warning signs (such as sudden
                 severe vertigo with face droop, arm weakness, speech trouble, or
-                severe headache), seek emergency care. The app includes emergency
-                cues when those signals are marked.
+                a sudden severe headache), seek emergency care. The app can show
+                emergency cues when those signals are marked; it cannot evaluate
+                an emergency for you.
               </li>
               <li>
                 Optional camera practice stays on your device. Stasus does not
-                store video. Practice metadata (for example timing and whether
-                tracking looked stable) may be saved with your account so you can
-                review sessions. See our{" "}
+                store video. You can practice with a simple camera mirror and
+                timer, or — only for some exercises — opt in to limited on-device
+                practice feedback. That feedback is not a form grade, not medical
+                clearance, and not a claim that you are doing an exercise
+                correctly or safely. Session metadata such as timing or optional
+                counts may be saved with your account. See our{" "}
                 <Link
                   href="/privacy/health-data"
                   className="font-medium text-[var(--stasus-ink)] underline-offset-4 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)]"

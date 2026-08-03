@@ -51,3 +51,30 @@ export function guideForMode(mode: CvTrackMode): "face" | "torso" {
     ? "torso"
     : "face";
 }
+
+/**
+ * Modes where on-device signals are strong enough to offer optional
+ * "practice feedback" (still not a clinical form grade).
+ */
+export function supportsFormFeedback(mode: CvTrackMode): boolean {
+  return mode === "face_gaze_hold" || mode === "pose_habituation";
+}
+
+export type CameraPracticeMode = "feedback" | "preview";
+
+export function cameraPracticeModeCopy(
+  trackMode: CvTrackMode,
+  practiceMode: CameraPracticeMode,
+): string {
+  if (practiceMode === "preview") {
+    return "You’ll see yourself on this device and can time the session. Count reps yourself if you want. No form or correctness scoring.";
+  }
+  switch (trackMode) {
+    case "face_gaze_hold":
+      return "Optional feedback: we estimate whether your gaze stayed with the target while you turn. Practice support only — not a form grade or medical clearance.";
+    case "pose_habituation":
+      return "Optional feedback: we count sit-to-stand cycles from your shoulders when you’re in frame. Practice support only — not a form grade or medical clearance.";
+    default:
+      return cvModeCopy(trackMode);
+  }
+}

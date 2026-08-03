@@ -180,13 +180,15 @@ export default function ConsumerHealthDataPrivacyPage() {
           <section className="mt-10">
             <h2 className={sectionTitle}>4. How biometric data is handled</h2>
             <p className={proseMuted}>
-              Webcam-based exercise tracking runs on your device using on-device
-              processing. Your camera feed itself is never transmitted to or
-              stored on Stasus servers. Only derived metadata, such as rep
-              counts, session timing, scores, and average tracking confidence,
-              is sent to our servers and stored, encrypted at rest. If you do
-              not consent to webcam-based tracking, you can use the
-              manual, non-tracked version of applicable exercises.
+              Webcam practice runs on your device. Your camera feed itself is
+              never transmitted to or stored on Stasus servers. You choose
+              whether to use a camera mirror without form feedback, or — for
+              some exercises — opt in to limited on-device practice feedback.
+              Only derived metadata you generate in that session (for example
+              timing, optional rep counts, and, if you opted into feedback,
+              tracking-confidence signals) may be sent to our servers and stored,
+              encrypted at rest. Feedback is not a clinical form score. You can
+              also log practice manually without the camera.
             </p>
           </section>
 
