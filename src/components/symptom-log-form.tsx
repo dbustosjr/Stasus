@@ -10,15 +10,20 @@ import { RED_FLAG_SIGNALS } from "@/lib/ai/red-flag";
 
 const initial: TrackerFormState = { error: null };
 
+type SymptomLogAction = (
+  prev: TrackerFormState,
+  formData: FormData,
+) => Promise<TrackerFormState>;
+
 export function SymptomLogForm({
   customTriggers,
+  action = createSymptomLog,
 }: {
   customTriggers: CustomTrigger[];
+  /** Defaults to live `createSymptomLog`. Demo passes a local action. */
+  action?: SymptomLogAction;
 }) {
-  const [state, formAction, pending] = useActionState(
-    createSymptomLog,
-    initial,
-  );
+  const [state, formAction, pending] = useActionState(action, initial);
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
@@ -135,7 +140,7 @@ export function SymptomLogForm({
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex h-12 items-center justify-center rounded-full bg-[var(--stasus-teal)] px-6 text-base font-semibold text-white disabled:opacity-60 dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
+        className="inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-teal)] px-6 text-base font-semibold text-white transition-colors hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
       >
         {pending ? "Saving…" : "Save entry"}
       </button>

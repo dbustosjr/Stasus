@@ -66,6 +66,13 @@ type PracticeCoachProps = {
   variant?: "inline" | "page";
   /** Shown after a page session ends. */
   backHref?: string;
+  /**
+   * Optional persistence inject (demo). When omitted, uses live
+   * `saveCameraPracticeSession` server action.
+   */
+  persistSession?: (
+    formData: FormData,
+  ) => Promise<SessionFormState>;
 };
 
 function formatElapsed(seconds: number): string {
@@ -116,6 +123,7 @@ export function PracticeCoach({
   title,
   variant = "inline",
   backHref,
+  persistSession,
 }: PracticeCoachProps) {
   const isPage = variant === "page";
   const mode =
@@ -575,7 +583,9 @@ export function PracticeCoach({
     if (confAvg != null) fd.set("cv_confidence_avg", confAvg.toFixed(3));
 
     try {
-      const result = await saveCameraPracticeSession(fd);
+      const result = persistSession
+        ? await persistSession(fd)
+        : await saveCameraPracticeSession(fd);
       setActionState(result);
       setPhase("collapsed");
       setPracticeMode(null);
@@ -647,7 +657,7 @@ export function PracticeCoach({
             {backHref ? (
               <Link
                 href={backHref}
-                className="inline-flex h-11 w-fit items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-semibold text-[var(--stasus-ink)]"
+                className="inline-flex h-11 w-fit cursor-pointer items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-semibold text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_16%,transparent)] active:scale-[0.98]"
               >
                 Back to exercise
               </Link>
@@ -840,7 +850,7 @@ export function PracticeCoach({
                   phase === "saving" || saving || phase === "calibrating"
                 }
                 onClick={() => void endPractice()}
-                className="inline-flex h-11 w-fit items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white disabled:opacity-60 dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
+                className="inline-flex h-11 w-fit cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white transition-colors hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
               >
                 {phase === "saving" || saving ? "Saving…" : "End practice"}
               </button>

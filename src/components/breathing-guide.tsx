@@ -9,7 +9,11 @@ type Phase = "inhale" | "exhale" | "rest";
  * Motion-safe breathing guide: no pulsing visuals when reduced-motion is on.
  * Timers still advance so the tool remains usable.
  */
-export function BreathingGuide() {
+export function BreathingGuide({
+  onComplete,
+}: {
+  onComplete?: () => void;
+} = {}) {
   const [running, setRunning] = useState(false);
   const [phase, setPhase] = useState<Phase>("rest");
   const [secondsLeft, setSecondsLeft] = useState(0);
@@ -53,9 +57,12 @@ export function BreathingGuide() {
         setRunning(false);
         setPhase("rest");
         setSecondsLeft(0);
-        void import("@/app/actions/activity").then(({ recordActivityDay }) =>
-          recordActivityDay("calm").catch(() => undefined),
-        );
+        if (onComplete) onComplete();
+        else {
+          void import("@/app/actions/activity").then(({ recordActivityDay }) =>
+            recordActivityDay("calm").catch(() => undefined),
+          );
+        }
         return;
       }
 
@@ -68,7 +75,7 @@ export function BreathingGuide() {
     }, 1000);
 
     return () => window.clearInterval(id);
-  }, [running]);
+  }, [running, onComplete]);
 
   const label =
     phase === "inhale"
@@ -110,7 +117,7 @@ export function BreathingGuide() {
         <button
           type="button"
           onClick={() => setRunning((v) => !v)}
-          className="inline-flex h-11 items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
+          className="inline-flex h-11 cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white transition-colors hover:opacity-90 active:scale-[0.98] dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
         >
           {running ? "Stop" : "Start gentle pace"}
         </button>

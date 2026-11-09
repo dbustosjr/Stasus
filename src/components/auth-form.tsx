@@ -84,7 +84,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           <button
             type="submit"
             disabled={verifyPending}
-            className="inline-flex h-12 items-center justify-center rounded-full bg-[var(--stasus-aqua)] px-6 text-base font-semibold text-[#001219] transition-colors disabled:opacity-60"
+            className="inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-aqua)] px-6 text-base font-semibold text-[#001219] transition-colors hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
           >
             {verifyPending ? "Verifying…" : "Verify email"}
           </button>
@@ -95,7 +95,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           <button
             type="submit"
             disabled={resendPending}
-            className="text-sm font-medium text-[var(--stasus-aqua)] underline-offset-2 hover:underline disabled:opacity-60"
+            className="cursor-pointer text-sm font-medium text-[var(--stasus-aqua)] underline-offset-2 hover:underline disabled:cursor-not-allowed disabled:opacity-60"
           >
             {resendPending ? "Sending…" : "Resend code"}
           </button>
@@ -155,7 +155,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex h-12 items-center justify-center rounded-full bg-[var(--stasus-aqua)] px-6 text-base font-semibold text-[#001219] transition-colors disabled:opacity-60"
+        className="inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-aqua)] px-6 text-base font-semibold text-[#001219] transition-colors hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending
           ? "Working…"

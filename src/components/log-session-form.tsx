@@ -8,11 +8,19 @@ import {
 
 const initial: SessionFormState = { error: null, ok: false };
 
-export function LogSessionForm({ exerciseId }: { exerciseId: string }) {
-  const [state, formAction, pending] = useActionState(
-    logExerciseSession,
-    initial,
-  );
+type SessionAction = (
+  prev: SessionFormState,
+  formData: FormData,
+) => Promise<SessionFormState>;
+
+export function LogSessionForm({
+  exerciseId,
+  action = logExerciseSession,
+}: {
+  exerciseId: string;
+  action?: SessionAction;
+}) {
+  const [state, formAction, pending] = useActionState(action, initial);
 
   return (
     <form
@@ -87,7 +95,7 @@ export function LogSessionForm({ exerciseId }: { exerciseId: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex h-11 w-fit items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white disabled:opacity-60 dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
+        className="inline-flex h-11 w-fit cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white transition-colors hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
       >
         {pending ? "Saving…" : "Mark practiced"}
       </button>

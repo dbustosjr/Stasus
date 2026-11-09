@@ -102,7 +102,7 @@ function LogDetail({
           <button
             type="button"
             onClick={() => scrollToLog(log.id)}
-            className="min-h-11 text-sm font-semibold text-[var(--stasus-aqua)] underline-offset-2 hover:underline"
+            className="min-h-11 cursor-pointer text-sm font-semibold text-[var(--stasus-aqua)] underline-offset-2 hover:underline"
           >
             View in list
           </button>
@@ -233,10 +233,10 @@ export function SeverityTrend({ logs, timeZone }: Props) {
   }
 
   const chipClass = (active: boolean) =>
-    `inline-flex min-h-11 items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)] ${
+    `inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full px-4 text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)] ${
       active
         ? "bg-[var(--stasus-aqua)] text-[#001219]"
-        : "border border-[var(--stasus-border)] bg-[var(--stasus-bg)] text-[var(--stasus-ink)]"
+        : "border border-[var(--stasus-border)] bg-[var(--stasus-bg)] text-[var(--stasus-ink)] hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_16%,transparent)]"
     }`;
 
   return (

@@ -25,9 +25,16 @@ type StepperProps = {
   title: string;
   steps: string[];
   doneLabel?: string;
+  /** Defaults to live activity stamp; demo passes a local stamp. */
+  onComplete?: () => void;
 };
 
-function GuidedStepper({ title, steps, doneLabel = "Done" }: StepperProps) {
+function GuidedStepper({
+  title,
+  steps,
+  doneLabel = "Done",
+  onComplete,
+}: StepperProps) {
   const [index, setIndex] = useState(-1);
   const [finished, setFinished] = useState(false);
 
@@ -89,7 +96,8 @@ function GuidedStepper({ title, steps, doneLabel = "Done" }: StepperProps) {
           onClick={() => {
             if (last) {
               setFinished(true);
-              void stampCalm();
+              if (onComplete) onComplete();
+              else void stampCalm();
             } else {
               setIndex((i) => i + 1);
             }
@@ -112,22 +120,46 @@ function GuidedStepper({ title, steps, doneLabel = "Done" }: StepperProps) {
   );
 }
 
-export function FearAvoidanceGuide() {
+export function FearAvoidanceGuide({
+  onComplete,
+}: {
+  onComplete?: () => void;
+}) {
   const steps = [
     ...FEAR_AVOIDANCE.steps.map((s) => `${s.label}: ${s.text}`),
     FEAR_AVOIDANCE.practice,
   ];
-  return <GuidedStepper title={FEAR_AVOIDANCE.title} steps={steps} />;
+  return (
+    <GuidedStepper
+      title={FEAR_AVOIDANCE.title}
+      steps={steps}
+      onComplete={onComplete}
+    />
+  );
 }
 
-export function SymptomCheckingGuide() {
+export function SymptomCheckingGuide({
+  onComplete,
+}: {
+  onComplete?: () => void;
+}) {
   const steps = SYMPTOM_CHECKING.prompts.map(
     (p) => `When the urge is “${p.urge}” try: ${p.reframe}`,
   );
-  return <GuidedStepper title={SYMPTOM_CHECKING.title} steps={steps} />;
+  return (
+    <GuidedStepper
+      title={SYMPTOM_CHECKING.title}
+      steps={steps}
+      onComplete={onComplete}
+    />
+  );
 }
 
-export function GroundingGuide() {
+export function GroundingGuide({
+  onComplete,
+}: {
+  onComplete?: () => void;
+}) {
   const [toolIndex, setToolIndex] = useState(0);
   const tool = GROUNDING.tools[toolIndex] ?? GROUNDING.tools[0]!;
 
@@ -139,7 +171,7 @@ export function GroundingGuide() {
             key={t.name}
             type="button"
             onClick={() => setToolIndex(i)}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+            className={`cursor-pointer rounded-full px-4 py-2 text-sm font-medium transition-colors ${
               i === toolIndex
                 ? "bg-[var(--stasus-aqua)] text-[#001219]"
                 : "border border-[var(--stasus-border)] text-[var(--stasus-ink-muted)] hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_16%,transparent)] hover:text-[var(--stasus-ink)]"
@@ -154,6 +186,7 @@ export function GroundingGuide() {
         title={tool.name}
         steps={tool.steps}
         doneLabel="Finish grounding"
+        onComplete={onComplete}
       />
     </div>
   );

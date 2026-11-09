@@ -2,19 +2,19 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export type AppTabKey = "home" | "exercises" | "tracker" | "calm" | "insights";
 
-const TABS: {
+const TAB_DEFS: {
   key: AppTabKey;
-  href: string;
+  path: string;
   label: string;
   icon: React.ReactNode;
 }[] = [
   {
     key: "home",
-    href: "/app",
+    path: "",
     label: "Home",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" aria-hidden className="size-5">
@@ -29,7 +29,7 @@ const TABS: {
   },
   {
     key: "exercises",
-    href: "/app/exercises",
+    path: "/exercises",
     label: "Exercises",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" aria-hidden className="size-5">
@@ -45,7 +45,7 @@ const TABS: {
   },
   {
     key: "tracker",
-    href: "/app/tracker",
+    path: "/tracker",
     label: "Tracker",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" aria-hidden className="size-5">
@@ -61,7 +61,7 @@ const TABS: {
   },
   {
     key: "calm",
-    href: "/app/calm",
+    path: "/calm",
     label: "Calm",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" aria-hidden className="size-5">
@@ -82,7 +82,7 @@ const TABS: {
   },
   {
     key: "insights",
-    href: "/app/insights",
+    path: "/insights",
     label: "Insights",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" aria-hidden className="size-5">
@@ -100,21 +100,30 @@ const TABS: {
 
 type AppTabBarProps = {
   active: AppTabKey;
+  basePath?: "/app" | "/demo";
 };
 
-export function AppTabBar({ active }: AppTabBarProps) {
+export function AppTabBar({ active, basePath = "/app" }: AppTabBarProps) {
   const router = useRouter();
   const [optimistic, setOptimistic] = useState(active);
+  const tabs = useMemo(
+    () =>
+      TAB_DEFS.map((t) => ({
+        ...t,
+        href: t.path ? `${basePath}${t.path}` : basePath,
+      })),
+    [basePath],
+  );
 
   useEffect(() => {
     setOptimistic(active);
   }, [active]);
 
   useEffect(() => {
-    for (const tab of TABS) {
+    for (const tab of tabs) {
       router.prefetch(tab.href);
     }
-  }, [router]);
+  }, [router, tabs]);
 
   return (
     <nav
@@ -122,7 +131,7 @@ export function AppTabBar({ active }: AppTabBarProps) {
       aria-label="App"
     >
       <ul className="mx-auto flex max-w-5xl items-stretch justify-around gap-0.5 px-1 pt-1">
-        {TABS.map((tab) => {
+        {tabs.map((tab) => {
           const isActive = optimistic === tab.key;
           return (
             <li key={tab.key} className="flex min-w-0 flex-1">

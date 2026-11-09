@@ -9,9 +9,15 @@ type AccountMenuProps = {
   email?: string | null;
   /** Only true when email is in ADMIN_EMAILS. */
   showAdmin?: boolean;
+  /** Portfolio demo: no live export/sign-out/admin/privacy DB. */
+  demo?: boolean;
 };
 
-export function AccountMenu({ email, showAdmin = false }: AccountMenuProps) {
+export function AccountMenu({
+  email,
+  showAdmin = false,
+  demo = false,
+}: AccountMenuProps) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -95,73 +101,106 @@ export function AccountMenu({ email, showAdmin = false }: AccountMenuProps) {
             {email}
           </p>
         ) : null}
-        <span className="block px-3 pb-1 text-xs leading-relaxed text-[var(--stasus-ink-muted)]">
-          Your symptom logs and practice sessions. Includes archived entries.
-        </span>
-        <button
-          type="button"
-          role="menuitem"
-          disabled={busy}
-          tabIndex={open ? 0 : -1}
-          className="block w-full cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--stasus-aqua)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-          onClick={() => void handleExport("/api/export/csv", "stasus-export.csv")}
-        >
-          Download CSV
-        </button>
-        <button
-          type="button"
-          role="menuitem"
-          disabled={busy}
-          tabIndex={open ? 0 : -1}
-          className="block w-full cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--stasus-aqua)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
-          onClick={() => void handleExport("/api/export/pdf", "stasus-export.pdf")}
-        >
-          Download PDF
-        </button>
-        {(status || error) && (
-          <p
-            className={`px-3 py-1.5 text-xs ${
-              error
-                ? "text-red-400"
-                : "text-[var(--stasus-ink-muted)]"
-            }`}
-            role="status"
-          >
-            {error ?? status}
-          </p>
+        {demo ? (
+          <>
+            <span className="block px-3 pb-1 text-xs leading-relaxed text-[var(--stasus-ink-muted)]">
+              Portfolio demo session. Sample data stays in this browser tab
+              only.
+            </span>
+            <Link
+              href="/privacy/health-data"
+              role="menuitem"
+              tabIndex={open ? 0 : -1}
+              className="block w-full cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--stasus-aqua)] active:scale-[0.98]"
+              onClick={() => setOpen(false)}
+            >
+              Health data privacy
+            </Link>
+            <div className="my-1 border-t border-[var(--stasus-border)]" />
+            <Link
+              href="/"
+              role="menuitem"
+              tabIndex={open ? 0 : -1}
+              className="block w-full cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--stasus-aqua)] active:scale-[0.98]"
+              onClick={() => setOpen(false)}
+            >
+              Exit demo
+            </Link>
+          </>
+        ) : (
+          <>
+            <span className="block px-3 pb-1 text-xs leading-relaxed text-[var(--stasus-ink-muted)]">
+              Your symptom logs and practice sessions. Includes archived
+              entries.
+            </span>
+            <button
+              type="button"
+              role="menuitem"
+              disabled={busy}
+              tabIndex={open ? 0 : -1}
+              className="block w-full cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--stasus-aqua)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={() =>
+                void handleExport("/api/export/csv", "stasus-export.csv")
+              }
+            >
+              Download CSV
+            </button>
+            <button
+              type="button"
+              role="menuitem"
+              disabled={busy}
+              tabIndex={open ? 0 : -1}
+              className="block w-full cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--stasus-aqua)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={() =>
+                void handleExport("/api/export/pdf", "stasus-export.pdf")
+              }
+            >
+              Download PDF
+            </button>
+            {(status || error) && (
+              <p
+                className={`px-3 py-1.5 text-xs ${
+                  error ? "text-red-400" : "text-[var(--stasus-ink-muted)]"
+                }`}
+                role="status"
+              >
+                {error ?? status}
+              </p>
+            )}
+            <div className="my-1 border-t border-[var(--stasus-border)]" />
+            <Link
+              href="/app/privacy"
+              role="menuitem"
+              tabIndex={open ? 0 : -1}
+              className="block w-full cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--stasus-aqua)] active:scale-[0.98]"
+              onClick={() => setOpen(false)}
+            >
+              Privacy
+            </Link>
+            {showAdmin ? (
+              <Link
+                href="/app/admin/usage"
+                role="menuitem"
+                tabIndex={open ? 0 : -1}
+                className="block w-full cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--stasus-aqua)] active:scale-[0.98]"
+                onClick={() => setOpen(false)}
+              >
+                Personal Admin
+              </Link>
+            ) : null}
+            <div className="my-1 border-t border-[var(--stasus-border)]" />
+            <form action={signOut}>
+              <button
+                type="submit"
+                role="menuitem"
+                tabIndex={open ? 0 : -1}
+                className="block w-full cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--stasus-aqua)] active:scale-[0.98]"
+              >
+                Sign out
+              </button>
+            </form>
+          </>
         )}
-        <div className="my-1 border-t border-[var(--stasus-border)]" />
-        <Link
-          href="/app/privacy"
-          role="menuitem"
-          tabIndex={open ? 0 : -1}
-          className="block w-full cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--stasus-aqua)] active:scale-[0.98]"
-          onClick={() => setOpen(false)}
-        >
-          Privacy
-        </Link>
-        {showAdmin ? (
-          <Link
-            href="/app/admin/usage"
-            role="menuitem"
-            tabIndex={open ? 0 : -1}
-            className="block w-full cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--stasus-aqua)] active:scale-[0.98]"
-            onClick={() => setOpen(false)}
-          >
-            Personal Admin
-          </Link>
-        ) : null}
-        <div className="my-1 border-t border-[var(--stasus-border)]" />
-        <form action={signOut}>
-          <button
-            type="submit"
-            role="menuitem"
-            tabIndex={open ? 0 : -1}
-            className="block w-full cursor-pointer rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[var(--stasus-ink)] transition-colors hover:bg-[color-mix(in_srgb,var(--stasus-aqua)_22%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--stasus-aqua)] active:scale-[0.98]"
-          >
-            Sign out
-          </button>
-        </form>
       </div>
     </div>
   );

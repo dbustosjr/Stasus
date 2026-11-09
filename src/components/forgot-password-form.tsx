@@ -47,7 +47,7 @@ export function ForgotPasswordForm() {
         </p>
         <Link
           href="/login"
-          className="inline-flex h-12 items-center justify-center rounded-full bg-[var(--stasus-aqua)] px-6 text-base font-semibold text-[#001219]"
+          className="inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-aqua)] px-6 text-base font-semibold text-[#001219] transition-colors hover:opacity-90 active:scale-[0.98]"
         >
           Back to sign in
         </Link>
@@ -101,7 +101,7 @@ export function ForgotPasswordForm() {
         <button
           type="submit"
           disabled={resetPending}
-          className="inline-flex h-12 items-center justify-center rounded-full bg-[var(--stasus-aqua)] px-6 text-base font-semibold text-[#001219] disabled:opacity-60"
+          className="inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-aqua)] px-6 text-base font-semibold text-[#001219] transition-colors hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {resetPending ? "Updating…" : "Update password"}
         </button>
@@ -144,7 +144,7 @@ export function ForgotPasswordForm() {
       <button
         type="submit"
         disabled={requestPending}
-        className="inline-flex h-12 items-center justify-center rounded-full bg-[var(--stasus-aqua)] px-6 text-base font-semibold text-[#001219] disabled:opacity-60"
+        className="inline-flex h-12 cursor-pointer items-center justify-center rounded-full bg-[var(--stasus-aqua)] px-6 text-base font-semibold text-[#001219] transition-colors hover:opacity-90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {requestPending ? "Sending…" : "Send reset code"}
       </button>

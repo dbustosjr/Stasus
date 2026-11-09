@@ -9,6 +9,7 @@ type PracticeCameraEntryProps = {
   exerciseId: string;
   category: ExerciseCategory;
   title: string;
+  basePath?: "/app" | "/demo";
 };
 
 /** CTA on the exercise detail page — camera opens on a dedicated practice screen. */
@@ -16,6 +17,7 @@ export function PracticeCameraEntry({
   exerciseId,
   category,
   title,
+  basePath = "/app",
 }: PracticeCameraEntryProps) {
   const mode =
     resolveCvTrackMode(category, title) ??
@@ -30,7 +32,7 @@ export function PracticeCameraEntry({
         while staying in frame.
       </p>
       <Link
-        href={`/app/exercises/${exerciseId}/practice`}
+        href={`${basePath}/exercises/${exerciseId}/practice`}
         className="mt-4 inline-flex h-11 w-fit items-center justify-center rounded-full bg-[var(--stasus-teal)] px-5 text-sm font-semibold text-white transition-transform active:scale-[0.98] dark:bg-[var(--stasus-aqua)] dark:text-[#001219]"
       >
         Practice with camera

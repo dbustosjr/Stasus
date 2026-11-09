@@ -102,6 +102,12 @@ export default async function Home({
                       Begin gently
                     </Link>
                     <Link
+                      href="/demo"
+                      className="inline-flex h-12 w-full cursor-pointer items-center justify-center rounded-full border border-[color-mix(in_srgb,white_55%,transparent)] bg-[color-mix(in_srgb,white_12%,transparent)] px-6 text-base font-semibold text-white transition-colors hover:border-white hover:bg-[color-mix(in_srgb,white_18%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:w-auto"
+                    >
+                      Try demo
+                    </Link>
+                    <Link
                       href="/login"
                       className="inline-flex h-12 w-full cursor-pointer items-center justify-center rounded-full border border-[color-mix(in_srgb,white_55%,transparent)] px-6 text-base font-medium text-white transition-colors hover:border-white hover:bg-[color-mix(in_srgb,white_10%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:w-auto"
                     >

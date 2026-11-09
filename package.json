@@ -20,7 +20,9 @@
     "test:insight-disclaimer": "node --experimental-strip-types scripts/test-insight-disclaimer.mjs",
     "test:polish-insight": "node --experimental-strip-types scripts/test-polish-insight.mjs",
     "test:cv": "npm run test:head-yaw && npm run test:balance-presence && npm run test:session-cv-fields && npm run test:phase-b-cv",
-    "test:phase-b-cv": "node --experimental-strip-types scripts/test-phase-b-cv.mjs"
+    "test:phase-b-cv": "node --experimental-strip-types scripts/test-phase-b-cv.mjs",
+    "test:demo-store": "node --experimental-strip-types scripts/test-demo-store.mjs",
+    "check:demo-isolation": "node scripts/check-demo-isolation.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

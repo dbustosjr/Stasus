@@ -32,7 +32,7 @@ export function DeleteAccountForm() {
         ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-4 text-sm font-medium text-red-200 underline-offset-2 hover:text-red-100 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300"
+        className="mt-4 cursor-pointer text-sm font-medium text-red-200 underline-offset-2 hover:text-red-100 hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-300"
       >
         Delete account
       </button>
@@ -77,7 +77,7 @@ export function DeleteAccountForm() {
           <button
             type="submit"
             disabled={pending}
-            className="inline-flex min-h-11 items-center justify-center rounded-full bg-red-500/90 px-5 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-200 disabled:opacity-60"
+            className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full bg-red-500/90 px-5 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-200 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {pending ? "Deleting…" : "Permanently delete"}
           </button>
@@ -85,7 +85,7 @@ export function DeleteAccountForm() {
             type="button"
             disabled={pending}
             onClick={() => setOpen(false)}
-            className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-medium text-[var(--stasus-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)]"
+            className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full border border-[var(--stasus-border)] px-5 text-sm font-medium text-[var(--stasus-ink)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--stasus-aqua)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             Cancel
           </button>
